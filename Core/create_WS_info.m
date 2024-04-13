@@ -80,7 +80,7 @@ f = figure(1); clf;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
 
-sgtitle(patient, 'Interpreter', 'none')
+sgtitle(patient,'Fontsize',fs,'FontWeight','bold','Interpreter','none');
 subplot(3,1,1)
     plot(Traw,ECGraw,'b')
     set(gca,'fontsize',fs)
@@ -123,7 +123,7 @@ raw_data.Hraw   = Hraw;
 raw_data.Praw   = Praw;
 
 figure(1); hold on
-sgtitle(patient, 'Interpreter', 'none')
+sgtitle(patient,'Fontsize',fs+2,'FontWeight','bold','Interpreter','none');
 subplot(3,1,1); hold on
     plot(Traw,ECGraw,'r')
     set(gca,'fontsize',fs)
@@ -135,7 +135,7 @@ subplot(3,1,2); hold on
     ylabel('HR (bpm)')
     set(gca,'fontsize',fs)
     xlim([0 max(TrawO)])
-    ylim([min(Hraw)-2 max(Hraw)+2])
+    ylim([min(Hraw)-10 max(Hraw)+2])
 subplot(3,1,3); hold on
     plot(Traw,Praw,'r')
     xlabel('Time (s)')
@@ -144,7 +144,7 @@ subplot(3,1,3); hold on
     ylim([min(Praw)-5 max(Praw)+5])
 
 figFolder = plotmarkers.figFolder;
-fileName = strcat(patient,'_dataAnalyzed.png');
+fileName = strcat(patient,'_dataAnalyzed.eps');
 fullFileName = fullfile(figFolder,'WS_data',fileName);
 exportgraphics(f,fullFileName);
 

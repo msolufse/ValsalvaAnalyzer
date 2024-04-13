@@ -15,7 +15,13 @@ load(strcat('../WS/',patient,'_WS_temp.mat'),'Traw','Praw');
 
 % Figure properties
 fs = plotmarkers.fs;
-lw = 1;
+lw = plotmarkers.lwt;
+if lw > 2
+    lw2 = lw -1;
+else
+    lw2 = 1;
+end;
+ms = plotmarkers.ms;
 figSize = plotmarkers.figSize;
 
 % Correcting systolic and diastoloic blood pressure signals
@@ -30,8 +36,8 @@ set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
 
 p1 = plot(Traw,Praw,'b-','DisplayName','BP (mmHg)');
-p2 = plot(Traw(DPinds),Praw(DPinds),'-o','Color',[0, 0.5, 0],'DisplayName','Diastolic','Linewidth',lw);
-p3 = plot(Traw(SPinds),Praw(SPinds),'-or','DisplayName','Systolic','Linewidth',lw);
+p2 = plot(Traw(DPinds),Praw(DPinds),'-o','Color',[0, 0.5, 0],'DisplayName','Diastolic','Linewidth',lw2);
+p3 = plot(Traw(SPinds),Praw(SPinds),'-or','DisplayName','Systolic','Linewidth',lw2);
 set(gca,'Fontsize',fs);
 title(patient,'Scrolling (enter when done)', 'interpreter', 'none');
 xlabel('Time (s)')
@@ -106,7 +112,7 @@ if strcmp(answer_SBP,'Yes') == 1
         end
         
         Praw(i_s) = ys;  
-        plot(Traw(i_s),Praw(i_s),'Or--','LineWidth',2,'DisplayName','Data Correction');
+        plot(Traw(i_s),Praw(i_s),'Or--','linewidth',lw2,'DisplayName','Data Correction');
         set(gca,'Fontsize',fs);
         xlabel('Time (s)');
         ylabel('BP (mmHg)');
@@ -193,7 +199,7 @@ if strcmp(answer_DBP,'Yes') == 1
         end
         
         Praw(i_d) = yd;  
-        plot(Traw(i_d),Praw(i_d),'Og--','LineWidth',2,'DisplayName','Data Correction');
+        plot(Traw(i_d),Praw(i_d),'Og--','linewidth',lw2,'DisplayName','Data Correction');
         xlabel('time (sec)');
         ylabel('BP (mmHg)');
         legend([p1 p2 p3],{'BP','Diastolic BP','Systolic BP'})
@@ -213,7 +219,7 @@ end
 
 bbutton = uicontrol('Parent',f,'Style','pushbutton',...
     'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
-    'String','Save and exit','fontsize',fs,'Callback',@closeButton);
+    'String','Save and exit','fontsize',fs,'Callback',@closeGenButton);
 
 uiwait(f)
     
@@ -225,10 +231,5 @@ PPraw  = SPraw - DPraw;
 
 s = strcat('../WS/',patient,'_WS_temp.mat');
 save(s,'Traw','Praw','PrawOrg','SPindsOrg','SPinds','DPindsOrg','DPinds','SPraw','DPraw','PPraw','-append');
-
-function [] = closeButton(a,~)
-    f = a.Parent;
-    close(f)
-end
 
 end % function create_WS_BP.m %

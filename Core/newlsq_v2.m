@@ -149,15 +149,13 @@ while(npc > tol & itc <= maxit & armstop == 0 & fc > tol*tol ...
        & abs(ared) > tol*tol)
         pact=proj_active(high,low,xc,npc);
         dc=moore(nu,jac,rout,svalcut,lmversion,pact);
-%       [dc,B]=lsq_upd(nu,jac,rout,svalcut,lmversion,pact,jold,step,B);
         xt=proj(xc+dc,high,low); 
         dx=xt-xc;
         ddx=jac*dx;
-%
-%       Derive the correct formula for pred.
-%
+
+%       Derive formula for pred.
         pred=-(jac'*rout)'*dx-.5*ddx'*ddx;
-%
+
         ft=feval(@tregf,xt,data);
         ared=fc-ft;
         if abs(ared) > tol*tol
@@ -217,11 +215,6 @@ while(npc > tol & itc <= maxit & armstop == 0 & fc > tol*tol ...
         else
         nu0=2.d0*nu0;
         end
-% RENEE CAN YOU FIGURE THIS OUT        
-%         if nu > numax 
-%            disp('max nu exceeded');
-%            armstop=1;
-%         end
 end
 %x=xc; histout=ithist(1:itc,:);
 x=xc; 
@@ -354,13 +347,12 @@ if nargin == 6
 else
 %
 % cubic model
-%
-    a=[lamc^2, lamc^3; lamm^2, lamm^3];
-    b=[qc; qm]-[q0 + qp0*lamc; q0 + qp0*lamm];
-    c=a\b;
-    lplus=(-c(1)+sqrt(c(1)*c(1) - 3 *c(2) *qp0))/(3*c(2));
-    if lplus < lleft lplus = lleft; end
-    if lplus > lright lplus = lright; end
+  a=[lamc^2, lamc^3; lamm^2, lamm^3];
+  b=[qc; qm]-[q0 + qp0*lamc; q0 + qp0*lamm];
+  c=a\b;
+  lplus=(-c(1)+sqrt(c(1)*c(1) - 3 *c(2) *qp0))/(3*c(2));
+  if lplus < lleft lplus = lleft; end
+  if lplus > lright lplus = lright; end
 end
 
 

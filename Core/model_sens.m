@@ -50,7 +50,7 @@ xlabel('Parameters')
 xlim([1 length(pars)]);
 
 figFolder = plotmarkers.figFolder;
-fileName = strcat(patient,'_sensitivities.png');
+fileName = strcat(patient,'_sensitivities.eps');
 fullFileName = fullfile(figFolder,'Model_fits',fileName);
 exportgraphics(f,fullFileName);
 

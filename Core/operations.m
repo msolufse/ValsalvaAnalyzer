@@ -14,33 +14,33 @@ if scp ~= 1
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         case '1.  Patient Information'
             create_WS_info(patient,plotmarkers);
-            
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         case '2.  Electrocardiogram (ECG)'
             create_WS_ECG(patient,plotmarkers);
-            
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         case '3.  Heart Rate (HR)'
             create_WS_HR(patient,plotmarkers);  
-
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         case '4.  Respiration'
             create_WS_Resp(patient,plotmarkers);  
-
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         case '5.  Blood Pressure (BP)'
             create_WS_BP(patient,plotmarkers);
-            
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         case '6.  VM Phases'
             data = create_WS_indices(patient,plotmarkers);
-            
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         case '7.  Clinical Ratios'  
             load(strcat('../WS/',patient,'_WS.mat'), 'data');
             
             [ClinicalRatios] = clinicalratios(data,plotmarkers);
- 
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         case '8.  Model Prediction (Nominal)'
             load(strcat('../WS/',patient,'_WS.mat'), 'data');
@@ -53,7 +53,7 @@ if scp ~= 1
             
             % Plot forward model with nominal parameter values 
             plot_model(patient,Outputs,HR,data,pars,0,plotmarkers); 
-
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         case '9.  Sensitivity Analysis'
             
@@ -64,7 +64,7 @@ if scp ~= 1
             [sens,sens_norm,Rsens,Isens] = model_sens(pars,data,plotmarkers); 
             
             save(strcat('../Sensitivities/',patient,'_sens.mat'),'sens','sens_norm','Rsens','Isens');
-            
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%     
         case '10. Optimization'
             
@@ -80,7 +80,7 @@ if scp ~= 1
             
             save(strcat('../Optimized/',patient,'_opt.mat'), ...
                 'HR_opt','Outputs_opt','optpars','pars','opt_info');
-            
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
         case '11. Plot Model Predictions'
             
@@ -103,16 +103,21 @@ if scp ~= 1
                     
                     % add save and exit button to plot
                 case 'Optimized'
-                    load(strcat('../Optimized/',patient,'_opt.mat'))
+                    % Load workspace
                     load(strcat('../WS/',patient,'_WS.mat'), 'data');
+
+                    % Get nominal parameter values
+                    [pars,data] = parameters(data);
+                    
+                    % Load optimized paramters
+                    load(strcat('../Optimized/',patient,'_opt.mat'))
                     
                     [HR_opt,~,~,Outputs_opt] = model_sol(optpars,data);
                     
                     % Plot forward model with optimized parameters
-                    plot_model(patient,Outputs_opt,HR_opt,data,optpars,1,plotmarkers); %plot results
-                   
+                    plot_model(patient,Outputs_opt,HR_opt,data,optpars,1,plotmarkers); %plot results 
             end
-        
+            close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
       end
     end

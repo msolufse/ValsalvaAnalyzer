@@ -16,6 +16,13 @@ for i = 1:length(x)
     [~,i_xR(i)] =  min(abs(T_RRint-x(i))); %find index for RR
 end
 
+lw = plotmarkers.lwt;
+if lw > 2
+    lw2 = lw -1;
+else
+    lw2 = 1;
+end;
+
 % Linear spline
 tA = T_RRint(i_xR(1)); 
 tB = T_RRint(i_xR(2)); 
@@ -32,17 +39,12 @@ HR_new(i_xR(1):i_xR(2)) = Ht;
 % Plot corrected heart rate and save the figure
 f = figure(1); hold on
 subplot(2,1,1);hold on
-g = plot(t,Ht,'Og-','LineWidth',2);
+g = plot(t,Ht,'Og-','LineWidth',lw2);
 ylim([min(HR)-5 max(HR)+5])
 xlim([min(T_RRint) max(T_RRint)])
 
 subplot(2,1,2);hold on
 xlim([min(Traw) max(Traw)])
-
-figFolder = plotmarkers.figFolder;
-fileName = strcat(patient,'_HeartRateECG.png');
-fullFileName = fullfile(figFolder,'WS_data',fileName);
-exportgraphics(f,fullFileName);
 
 answer_HR = questdlg('Accept changes?','Heart Rate','Yes','Undo','Add change','Yes');
 
@@ -52,7 +54,7 @@ elseif strcmp(answer_HR,'Undo') == 1
     HR_new = HR;
     figure(1); hold on
     delete(g)
-    
+
     answer_HR = questdlg('Accept changes?','Heart Rate','Yes','Add change','Yes');
 
 elseif strcmp(answer_HR,'Add change') == 1

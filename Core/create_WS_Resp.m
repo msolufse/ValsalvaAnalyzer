@@ -48,7 +48,7 @@ TRS = [Traw(1); TRS; Traw(end)];
 S = griddedInterpolant(TRS,RS,'pchip'); 
 QRamplitudes = S(Traw); %Evaluate at the time points 
 
-%% Find peaks and valleys minimum peak distance of 1.5 sec 
+%% Find peaks and valleys minimum peak distance of 1.5 seconds
 [p,ploc] = findpeaks(QRamplitudes,Fs,'MinPeakDistance',1.5); 
 [v,vloc] = findpeaks(-QRamplitudes,Fs,'MinPeakDistance',1.5);
 v = -v;
@@ -124,15 +124,15 @@ Rdata   = Rspline(Traw);
 f = figure(1); clf; hold on;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
-set(gca,'fontsize',fs)
 title(patient,'Interpreter','none'); hold on;
 plot(Traw,Rdata,'b-','Linewidth',lw);
+set(gca,'fontsize',fs)
 xlim([Traw(1),Traw(end)])
 ylabel('Respiration')
 xlabel('Time (s)')
 
 figFolder = plotmarkers.figFolder;
-fileName = strcat(patient,'_RespiratorySignal.png');
+fileName = strcat(patient,'_Respiration.eps');
 fullFileName = fullfile(figFolder,'WS_data',fileName);
 exportgraphics(f,fullFileName);
 

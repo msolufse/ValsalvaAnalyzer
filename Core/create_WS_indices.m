@@ -9,13 +9,16 @@ function data = create_WS_indices(patient,plotmarkers)
 global Height Sex Weight SPinds DPraw DPinds dt ECGraw ...
        Hraw HRdata PPraw Praw Rdata RRdata SPraw Traw  
 
-%% Tess why do we have Hraw and HRdata (that is confusing)
-
 load(strcat('../WS/',patient,'_WS_temp.mat'))
 
 % Figure properties
 fs = plotmarkers.fs;        
-lw = round(plotmarkers.lwt/2);
+lw = plotmarkers.lwt;
+if lw > 2
+    lw2 = lw -1;
+else
+    lw2 = 1;
+end;
 figSize = plotmarkers.figSize;
 
 %% Find Start and Stop 
@@ -24,11 +27,11 @@ SPbar = trapz(SPraw(1:1000-1))/(1000 - 1); % was 100 very short to take the aver
 f = figure(1); clf; hold on;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
-sgtitle(patient, 'Interpreter', 'none')
+sgtitle(patient,'Fontsize',fs,'FontWeight','bold','Interpreter', 'none')
 
 subplot(4,1,1); hold on
-  plot(Traw,Praw,'Color',[0 0.4470 0.7410],'linewidth',1);
-  plot(Traw,SPraw,'b','LineWidth',lw);
+  plot(Traw,Praw,'Color',[0 0.4470 0.7410]);
+  plot(Traw,SPraw,'b','LineWidth',lw2);
   set(gca,'Fontsize',fs);
   title('VM start (min before first peak)','VM end (max before drop & overshoot)');
   ylabel('BP (mmHg)')
@@ -37,23 +40,23 @@ subplot(4,1,1); hold on
   ylim([min(Praw)-5 max(Praw)+5])
 
 subplot(4,1,2); hold on
-  plot(Traw,HRdata,'b','LineWidth',lw,'Displayname','HR (bpm)');
+  plot(Traw,HRdata,'b','LineWidth',lw2,'Displayname','HR (bpm)');
   set(gca,'Fontsize',fs);
   ylabel('HR (bpm)');
   xlim([0 Traw(end)]);
   ylim([min(HRdata)-2 max(HRdata)+2])
 
 subplot(4,1,3); hold on
-  plot(Traw,Rdata,'b','LineWidth',lw);
+  plot(Traw,Rdata,'b','LineWidth',lw2);
   set(gca,'Fontsize',fs);
   ylabel('Resp (mV)');
   xlim([0 Traw(end)]);
   
 subplot(4,1,4); hold on
-  plot(Traw,ECGraw,'b','LineWidth',1);
+  plot(Traw,ECGraw,'b');
   set(gca,'Fontsize',fs);
   ylabel('ECG (mV)');
-  xlabel('Time (sec)')
+  xlabel('Time (s)')
   xlim([Traw(1) Traw(end)]);
 
 [val_times, ~ ] = ginput(2);
@@ -211,13 +214,6 @@ dPthdt = diff(Pthdata)/dt;
 dPthdt = [dPthdt;dPthdt(end)];
 dPthdt_bar = trapz(dPthdt(1:i_ts - 1))/(i_ts - 1);
 
-% ODE tolerance 
-ODE_TOL  = 1e-8;
-DIFF_INC = sqrt(ODE_TOL);
-
-gpars.ODE_TOL   = ODE_TOL;
-gpars.DIFF_INC  = DIFF_INC;
-
 % Make Data Structure
 clear data
 data.Traw       = Traw_cut;
@@ -271,7 +267,7 @@ data.dSBPdt_bar = dSBPdt_bar;
 data.dPthdt_bar = dPthdt_bar;
 data.dPPdt_bar  = dPPdt_bar;
 
-data.gpars = gpars; 
+%data.gpars = gpars; 
 
 % Four Panel Figure
 %X- and Y- axis limits for plots
@@ -317,7 +313,7 @@ lgray = [.95 .95 .95];
 f = figure(3); clf;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
-sgtitle(patient, 'Interpreter', 'none')
+sgtitle(patient,'Fontsize',fs,'FontWeight','bold','Interpreter', 'none')
 
 subplot(3,1,1); hold on;
   patch(x1,yP,gray)
@@ -327,8 +323,8 @@ subplot(3,1,1); hold on;
   plot(t2eVM * I,Plims,'k:','LineWidth',1)
   plot(Tlims, SPbar * I,'k:','LineWidth',1)
   plot(Tlims, PPbar * I,'k:','linewidth',1)
-  h1 = plot(data.Traw,data.Praw,'Color',[0 0.4470 0.7410],'LineWidth',1);
-  h2 = plot(data.Tdata,data.SPdata,'b','linewidth',lw);
+  h1 = plot(data.Traw,data.Praw,'Color',[0 0.4470 0.7410]);
+  h2 = plot(data.Tdata,data.SPdata,'b','linewidth',lw2);
   set(gca,'Fontsize',fs); 
   legend([h1 h2],'BP','SBP','location','southwest')
   ylabel('BP (mmHg)')
@@ -362,9 +358,8 @@ subplot(3,1,3); hold on;
   xlim(Tlims)
   ylim(Pthlims)
   
-
   figFolder = plotmarkers.figFolder;
-  fileName = strcat(patient,'_VMphases.png');
+  fileName = strcat(patient,'_VMphases.eps');
   fullFileName = fullfile(figFolder,'WS_data',fileName);
   exportgraphics(f,fullFileName);
    
@@ -374,8 +369,9 @@ subplot(3,1,3); hold on;
       
   uiwait(f)
 
+
 % Save workspace
-save(strcat('../WS/',patient,'_WS.mat'),... %Name of file
+save(strcat('../WS/',patient,'_WS.mat'),...    
     'Traw','ECGraw','Hraw','Praw','HRdata','SPraw','DPraw',...
     'RRdata','data','val_start', 'val_end','T_RRint', ...
     'data','SPinds','DPinds', 'patient','Age','Sex','Height','Weight');

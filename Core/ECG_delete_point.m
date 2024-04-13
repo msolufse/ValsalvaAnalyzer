@@ -1,4 +1,10 @@
 function [TR,R,TS,S]=ECG_delete_point(TR,R,TS,S,qr,y) 
+% function ECG_delete_point
+% Input: location and value of R (TR, R) and S (TS,S) points within an ECG.
+%        If y > 0 an R point is removed else an S point is removed.
+% Output: augmented list of R and S points along with their location.
+% Description: ECG_delete_point removes an R or S point from the list.
+
 % TR - R time points (R>0)
 % TS - S time points (S<0)
 

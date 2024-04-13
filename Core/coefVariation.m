@@ -1,26 +1,28 @@
-% Get parameters postoptimization
-%pars = [D; B;                                   % Convex combination parameters 1-2
+% Calculates the coefficient of variation for multiple iterations
+% of optimized parameters.
+%
+% pars = [D; B;                                  % Convex combination parameters 1-2
 %    A;                                          % Wall strain parameter 3 
-%    K_P; K_b; K_pb; K_pr; K_s;                  % Gains 4-8
-%    tau_P; tau_b; tau_pb; tau_pr; tau_s; tau_H; % Time Constants 9-14
-%    q_w; q_pb; q_pr; q_s;                       % Sigmoid Steepnesses 15-18
-%    xi_w; xi_pb; xi_pr; xi_s;                   % Sigmoid Shifts 19-22
-%    HI; H_pb; H_pr; H_s;                        % Heart Rate Parameters 23-26
-%    HIa;tchar];
+%    K; K_b; K_pb; K_pr; K_s;                    % Gains 4-8
+%    tau; tau_b; tau_p; tau_r; tau_s; tau_H;     % Time Constants 9-14
+%    q_w; q_p; q_r; q_s;                         % Sigmoid Steepnesses 15-18
+%    xi_w; xi_p; xi_r; xi_s;                     % Sigmoid Shifts 19-22
+%    HI; H_p; H_r; H_s;                          % Heart Rate Parameters 23-26
+%    HIa; tchar];
 
 clear; close all;
 pars_names = {'$D$', '$B$', '$A$', ...
-    '$K_P$','$K_b$','$K_{pb}$','$K_{pr}$','$K_s$', ...
-    '$\tau_P$','$\tau_b$','$\tau_{pb}$','$\tau_{pr}$','$\tau_s$','$\tau_H$',...
-    '$q_w$','$q_{pb}$','$q_{pr}$','$q_{s}$', ...
-    '$\xi_w$','$\xi_{pb}$','$\xi_{pr}$','$\xi_{s}$', ...
-    '$H_I$','$H_{pb}$','$H_{pr}$','$H_{s}$', ...
+    '$K$','$K_b$','$K_p$','$K_r$','$K_s$', ...
+    '$\tau$','$\tau_b$','$\tau_p$','$\tau_r$','$\tau_s$','$\tau_H$',...
+    '$q_w$','$q_p$','$q_r$','$q_s$', ...
+    '$\xi_w$','$\xi_p$','$\xi_r$','$\xi_s$', ...
+    '$H_I$','$H_[$','$H_r$','$H_s$', ...
     '$H_{Ia}$','tchar'};
 
 N = 28;
 
 all_pars = zeros(N,1);
-for iter=1:4
+for iter=1:9
    s = strcat('Ex1_opt',num2str(iter),'.mat');
    cd ../Optimized
    load(s);
@@ -56,6 +58,3 @@ disp('cost & grad')
 all_cost_grad
 
 cd ../../Core
-
-%ax = gcf;
-%exportgraphics(ax,'Boxplot_allpars.png','Resolution',300)

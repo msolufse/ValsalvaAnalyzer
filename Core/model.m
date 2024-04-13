@@ -24,34 +24,34 @@ A   = pars(3); % Wall strain parameter
 % Gains 
 K_P    = pars(4);       % unitless
 K_b    = pars(5);       % unitless
-K_pb   = pars(6);       % unitless
-K_pr   = pars(7);       % unitless
+K_p    = pars(6);       % unitless
+K_r    = pars(7);       % unitless
 K_s    = pars(8);       % unitless
     
 % Time scales
-tau_P  = pars(9);       % s 
+tau    = pars(9);       % s 
 tau_b  = pars(10);      % s
-tau_pb = pars(11);      % s 
-tau_pr = pars(12);      % s 
+tau_p  = pars(11);      % s 
+tau_r  = pars(12);      % s 
 tau_s  = pars(13);      % s
 tau_H  = pars(14);      % s
     
 % Sigmoid steepnesses
 q_w    = pars(15);      % mmHg^{-1}
-q_pb   = pars(16);      % unitless
-q_pr   = pars(17);      % unitless
+q_p    = pars(16);      % unitless
+q_r    = pars(17);      % unitless
 q_s    = pars(18);      % unitless
     
 % Sigmoid shifts 
 xi_w   = pars(19);      % mmHg
-xi_pb  = pars(20);      % unitless 
-xi_pr  = pars(21);      % unitless
+xi_p   = pars(20);      % unitless 
+xi_r   = pars(21);      % unitless
 xi_s   = pars(22);      % unitless
     
 % Heart rate parameters 
 H_I    = pars(23);      % bpm
-H_pb   = pars(24);      % unitless
-H_pr   = pars(25);      % unitless
+H_p    = pars(24);      % unitless
+H_r    = pars(25);      % unitless
 H_s    = pars(26);      % unitless 
     
 % HR drop after phase 3 
@@ -63,8 +63,8 @@ Pc_m   = x(1);          % mmHg
 Pa_m   = x(2);          % mmHg
 eps_bc = x(3);          % unitless
 eps_ba = x(4);          % unitless
-T_pb   = x(5);          % unitless
-T_pr   = x(6);          % unitless
+T_p    = x(5);          % unitless
+T_r    = x(6);          % unitless
 T_s    = max(x(7),0);   % unitless 
 H      = x(8);          % bpm
     
@@ -82,28 +82,28 @@ H      = x(8);          % bpm
  n = B*(eps_wc - eps_bc) + (1 - B)*(eps_wa - eps_ba);
     
  % Sigmoidal function 
- G_pb = 1/(1 + exp(-q_pb*(n - xi_pb)));
- G_s  = 1/(1 + exp(q_s*(n - xi_s)));
- G_pr = 1/(1 + exp(q_pr*(Pth - xi_pr)));
+ G_p  = 1/(1 + exp(-q_p*(n - xi_p)));
+ G_s  = 1/(1 + exp( q_s*(n - xi_s)));
+ G_r  = 1/(1 + exp( q_r*(Pth - xi_r)));
     
- if t > tchar 
-    H_I = H_Ia; 
- end 
+if t > tchar 
+   H_I = H_Ia; 
+end 
     
  % Heart rate (bpm) 
- H_tilde = H_I*(1 - H_pb*T_pb + H_pr*T_pr + H_s*T_s);
+ H_tilde = H_I*(1 - H_p*T_p + H_r*T_r + H_s*T_s);
     
  %% ODEs     
- dPc_mdt = (-Pc_m + Pc - K_P * dPcdt)/tau_P;
- dPa_mdt = (-Pa_m + Pa - K_P * dPadt)/tau_P;
+ dPc_mdt = (-Pc_m + Pc - K_P * dPcdt)/tau;
+ dPa_mdt = (-Pa_m + Pa - K_P * dPadt)/tau;
  debcdt  = (-eps_bc + K_b*eps_wc)/tau_b;
  debadt  = (-eps_ba + K_b*eps_wa)/tau_b;
- dTpbdt  = (-T_pb + K_pb*G_pb )/tau_pb;
- dTprdt  = (-T_pr + K_pr*G_pr)/tau_pr;
+ dTpdt   = (-T_p + K_p*G_p )/tau_p;
+ dTrdt   = (-T_r + K_r*G_r)/tau_r;
  dTsdt   = (-T_s + K_s*G_s)/tau_s;
  dHdt    = (-H + H_tilde)/tau_H;
  
  % The vector of the right hand sides of the ODEs
- dxdt = [dPc_mdt; dPa_mdt; debcdt; debadt; dTpbdt; dTprdt; dTsdt; dHdt;];
+ dxdt = [dPc_mdt; dPa_mdt; debcdt; debadt; dTpdt; dTrdt; dTsdt; dHdt;];
 
 end % function model.m %

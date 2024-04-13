@@ -11,10 +11,12 @@ t_bound=max(t);
 
 fs = plotmarkers.fs;
 lw = plotmarkers.lwt;
-figSize = plotmarkers.figSize;
 if lw > 2
-    lw = 2;
-end
+    lw2 = lw - 1;
+else
+    lw2 = 1;
+end;
+figSize = plotmarkers.figSize;
 
 %partition data into regions
 ch1_cell=cell(3,no_reg); %cells for storing partitioned data
@@ -28,25 +30,26 @@ for ind=2:no_reg
     ch1_mat{3,ind}=max(find(t<=t_bound(ind-1)));    
 end
 
-%plotting stuff for selecting distance between peaks
-
+% Selecting the distance between peaks
 f = figure(1);clf;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
 
 for ind=1:no_reg
+    xID = min(ch1_mat{1,ind})+.2*(max(ch1_mat{1,ind}));
+    ID = max(find(ch1_mat{1,ind}<xID));
     subplot(no_reg,1,ind);
-    plot(ch1_mat{1,ind},ch1_mat{2,ind},'b','Linewidth',lw);
-    axis([min(ch1_mat{1,ind}) min(ch1_mat{1,ind})+.2*(max(ch1_mat{1,ind})-min(ch1_mat{1,ind})) min(ch1_mat{2,ind})-.05*max(ch1_mat{2,ind}) max(ch1_mat{2,ind})+.05*max(ch1_mat{2,ind})]);
+    plot(ch1_mat{1,ind}(1:ID),ch1_mat{2,ind}(1:ID),'b','Linewidth',lw2);
+    axis([min(ch1_mat{1,ind}(1:ID)) max(ch1_mat{1,ind}(1:ID)) min(ch1_mat{2,ind}(1:ID))*0.95 max(ch1_mat{2,ind}(1:ID))*1.05]);
 end
-
 title(patient,'Click on two consecutive peaks (from left to right)','interpreter','none');
 xlabel('Time (s)')
 ylabel('BP (mmHg)');
 set(gca,'fontsize',fs)
+
 [t_peaks p_peaks]= ginput(2*no_reg);
 
-%determine pts for each region and compute period vectors
+% Determine pts for each region and compute period vectors
 for ind=1:no_reg
     %change length multiplier (.35) to adjust pts
     pts(ind)=ceil(.4*length(find((ch1_mat{1,ind}>=t_peaks(2*ind-1)) & (ch1_mat{1,ind}<=t_peaks(2*ind)))));
@@ -55,14 +58,14 @@ for ind=1:no_reg
     ch1_mat{5,ind}=peaks2(-ch1_mat{2,ind},pts(ind),thresh)+ch1_mat{3,ind};
 end
         
-%create period boundary vectors
+% Create period boundary vectors
 per_p=[]; peak_p=[]; 
 for ind=1:no_reg
     peak_p=[peak_p; ch1_mat{4,ind}];
     per_p=[per_p; ch1_mat{5,ind}];
 end
 
-%eliminates period boundaries that are very close
+% Deliminates period boundaries that are very close
 bad_per_p=0; 
 while(bad_per_p)
     diff_p=diff(per_p); 
@@ -73,7 +76,7 @@ while(bad_per_p)
     end
 end
 
-per_pc=per_p; %copies of period vectors
+per_pc=per_p; % Copies of period vectors
 clear per_p 
 for ind=1:length(peak_p)
     if(length(per_pc(max(find(per_pc<peak_p(ind)))))>0)

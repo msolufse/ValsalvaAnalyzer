@@ -1,10 +1,11 @@
- % Input: none
+function DriverBasic
+% Input: none
 % Output: generated figures and excel file with analyzed data
 % Description: Runs software
 
-%clear all
-%close all
-%warning off
+clear all
+close all
+warning off
 
 % Select screen and figure properties. Recommendations for PCs and Macs
 % listed. Default is set to a Mac.
@@ -37,15 +38,16 @@ figFolder = fullfile(pwd,'Figures');
 % Set figure size
 screenSize   = get(0,'screensize');
 width   = floor(screenSize(3)/2);
-height  = floor(screenSize(4)/2);
+height  = floor(screenSize(4)/1.5);
 left    = floor((screenSize(3)-width)/4);
 bottom  = floor((screenSize(4)-height)/4);
 if PCcomp == 1
     figSize = [left bottom width height];
     posCB = [figSize(1)+figSize(3)*0.8,10,figSize(3)*0.25,figSize(4)*0.05];
 else
-    figSize = 0.75.*screenSize;
+    figSize      = 0.75.*screenSize;
     figSize(1:2) = 0.12*screenSize(3:4);
+    figSize(4)   = figSize(4)*0.90;
     posCB = [25+figSize(3)*0.7,10,figSize(3)*0.25,figSize(4)*0.05];
 end;
 
@@ -58,13 +60,9 @@ plotmarkers.posCB      = posCB;
 while isempty(indx) == 0
 
 prompt   = {'Select patients'};
-
 dlgtitle = 'Patient List';
-
-d       = dir('Labchart/*.mat');
-
-liststr = {d.name};
-
+d        = dir('Labchart/*.mat');
+liststr  = {d.name};
 prompt  = {'Select a file',...
            'Hold control/command to slect multiple',''};
 
@@ -108,9 +106,7 @@ end
 
 while notdone
     call_flag = call_flag_list{indx_op};
-    operations(list,call_flag,plotmarkers);
-
-    close all
+    operations(list,call_flag,plotmarkers); % code used to select operations
 
     [indx_op,tf] = listdlg('PromptString',prompt_op,...
     'SelectionMode','multiple','ListString',call_flag_list,...
@@ -124,7 +120,7 @@ while notdone
     
     if sum(indx_op) == 0 
         str = pwd;
-        if strcmp('ValsalvaSoftware',str(end-17:end-2))==1
+        if strcmp('ValsalvaAnalyzer',str(end-17:end-2))==1
             return
         elseif strcmp('Core',str(end-3:end)) == 1
             cd ..

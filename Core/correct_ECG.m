@@ -15,11 +15,14 @@ lw = plotmarkers.lwt;
 figSize = plotmarkers.figSize;
 if lw > 2
     lw2 = lw-1;
-elseif lw == 2
-    lw2 = lw-1;
 else
-    lw2 = lw;
-end
+    lw2 =1;
+end;
+if lw > 2
+    lw3 = 1;
+else
+    lw3 = 0.75;
+end;
 
 %% Loop correcting ECG
 notdone = true;
@@ -32,13 +35,13 @@ while notdone
     set(gcf,'units','points','position',figSize)
     f.Units = 'pixels';
 
-    h1 = plot(Traw,ECGraw,'k-','linewidth',1);
+    h1 = plot(Traw,ECGraw,'k-','linewidth',lw3);
     h2 = plot(TR,R,'ro','markersize',ms,'linewidth',lw2);
     h3 = plot(TS,S,'bo','markersize',ms,'linewidth',lw2);
     hold off
     set(gca,'FontSize',fs)
     xlim([Traw(1), 15])
-    xlabel('Time (sec)')
+    xlabel('Time (s)')
     ylabel('Raw ECG (mV)')
     title(patient,'Inspect ECG (scrolling - enter to continue)','interpreter','none')
     str1 = {'Number of S points: ',num2str(nS)};
@@ -78,13 +81,14 @@ while notdone
                 figure(1);hold on
                 a_new = plot(TR(new+1),R(new+1),'o','color','#77AC30',...
                     'markersize',ms,'linewidth',lw);
+                pause(1);
             end
             nR = length(R);
             nS = length(S);
             
             figure(1); pan on
-            delete(a1)
-            delete(a2)
+            delete(a1);
+            delete(a2);
             
             str1 = {'Number of S points: ',num2str(nS)};
             str2 = {'Number of R points: ',num2str(nR)};
@@ -100,8 +104,7 @@ while notdone
             delete(h2);
             delete(h3);
             h2 = plot(TR,R,'ro','markersize',ms,'linewidth',lw2);
-            h3 = plot(TS,S,'bo','markersize',ms,'linewidth',lw2);
-            
+            h3 = plot(TS,S,'bo','markersize',ms,'linewidth',lw2);            
             pause
             
             answer_repeat = questdlg('Do you want to correct RS points?', ...

@@ -34,29 +34,30 @@ Tdata = Tdata - Tdata(1);
 Traw  = Traw - Traw(1);
 
 % Model outputs
-T_pb = Outputs(:,6);
-T_pr = Outputs(:,7);
+T_p  = Outputs(:,6);
+T_r  = Outputs(:,7);
 T_s  = Outputs(:,8); 
 T_s(T_s < 0) = 0; 
 
 % Scaling parameters 
-H_pb = exp(pars(24)); 
-H_pr = exp(pars(25));
+H_p  = exp(pars(24)); 
+H_r  = exp(pars(25));
 H_s  = exp(pars(26)); 
 
-X_pb = T_pb .* H_pb; 
-X_pr = T_pr .* H_pr; 
-X_s  = T_s  .* H_s;
+X_p  = T_p .* H_p; 
+X_r  = T_r .* H_r; 
+X_s  = T_s .* H_s;
     
 % Set plot limits
+Ms = length(HR)-length(Tdata)+1;
 
 % X- and Y- axis limits for plots
 Tlims   = [Tdata(1) Tdata(end)]; 
 Plims   = [min(Praw)-10 max(Praw)+10]; 
-Hlims   = [min(Hdata)-5 max([Hdata' HR'])+5];
+Hlims   = [min([Hdata' HR(Ms:end)'])-5 max([Hdata' HR(Ms:end)'])+5];
 Pthlims = [min(Pthdata)-1 max(Pthdata)+1]; 
 
-effmax  = max([T_pb;T_pr;T_s]);
+effmax  = max([T_p;T_r;T_s]);
 efflims = [-0.1 , max(effmax*1.05,1)]; 
 
 % Times for VM phases
@@ -91,12 +92,12 @@ gray  = [.9 .9 .9];
 lgray = [.95 .95 .95];
 
 % Four Panel Figure
-f = figure(1); hold on;
+f = figure(1);  hold on;
 set(gcf,'units','points','position',figSize)
 if opt_flag == 0
-    sgtitle(strcat(pt_id,'_nominal'),'Interpreter', 'none','fontsize',fs)
+    sgtitle(strcat(pt_id,' Nominal'),'fontsize',fs,'FontWeight','bold','Interpreter', 'none')
 elseif opt_flag == 1
-    sgtitle(strcat(pt_id,'_weighted_optimization'),'Interpreter', 'none','fontsize',fs)
+    sgtitle(strcat(pt_id,' Optimized'),'fontsize',fs,'FontWeight','bold','Interpreter', 'none')
 end
 subplot(2,2,1); hold on;
     set(gca,'Fontsize',fs)
@@ -113,7 +114,6 @@ subplot(2,2,1); hold on;
     xlim(Tlims)
     ylim(Plims)
     
-Ms = length(HR)-length(Tdata)+1;
 subplot(2,2,2);hold on;
     set(gca,'Fontsize',fs)
     patch(x1,yH,gray)
@@ -150,8 +150,8 @@ subplot(2,2,4); hold on;
     patch(x3,yeff,gray)
     patch(x4,yeff,lgray)
     plot(t2eVM * I,efflims,'k:','LineWidth',1)
-    h1 = plot(Tdata, T_pb(Ms:end),'m','LineWidth',lw);
-    %h2 = plot(Tdata, T_pr,'LineWidth',lw); 
+    h1 = plot(Tdata, T_p(Ms:end),'m','LineWidth',lw);
+    %h2 = plot(Tdata, T_r,'LineWidth',lw); 
     h3 = plot(Tdata, T_s(Ms:end), 'LineWidth',lw,'color',[ 0.30  0 0.5]);
     xlabel('Time (s)')
     ylabel('Baroreflex')
@@ -163,17 +163,17 @@ subplot(2,2,4); hold on;
     figFolder = plotmarkers.figFolder;
 
     if opt_flag == 1
-        fileName = strcat(patient,'_optimized.png');
+        fileName = strcat(patient,'_optimized.eps');
         fullFileName = fullfile(figFolder,'Model_fits',fileName);
     elseif opt_flag == 0
-        fileName = strcat(patient,'_nominal.png');
+        fileName = strcat(patient,'_nominal.eps');
         fullFileName = fullfile(figFolder,'Model_fits',fileName);
     end
     exportgraphics(f,fullFileName);
-
-    bbutton = uicontrol('Parent',f,'Style','pushbutton',...
-       'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
-       'String','Save and exit','Fontsize',fs,'Callback',@closeGenButton);
+     
+     bbutton = uicontrol('Parent',f,'Style','pushbutton',...
+        'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
+        'String','Save and exit','Fontsize',fs,'Callback',@closeGenButton);
 
     uiwait(f);
 

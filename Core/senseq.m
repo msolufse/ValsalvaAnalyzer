@@ -59,7 +59,7 @@ function z = dirder(x,w,f,f0,data)
 %                before the call to dirder
 
 % Hardwired difference increment.
-epsnew = data.gpars.DIFF_INC;
+epsnew = data.DIFF_INC;
 n = length(x);
 
 % scale the step

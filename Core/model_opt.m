@@ -7,7 +7,7 @@ function [optpars,opt_info] = model_opt(pars,data)
 %Description: Estimates identifiable model parameters
 
 % ODE solver tolerance
-ODE_TOL = data.gpars.ODE_TOL; 
+ODE_TOL = data.ODE_TOL; 
     
 % lower and upper parameter bounds
 lb = data.lb; 
@@ -20,25 +20,21 @@ DIFF_INC = sqrt(ODE_TOL);
 %pars = [D; B;                                   % Convex combination parameters 1-2
 %    A;                                          % Wall strain parameter 3 
 %    K_P; K_b; K_pb; K_pr; K_s;                  % Gains 4-8
-%    tau_P; tau_b; taup_pb tau_pr; tau_s; tau_H; % Time Constants 9-14
-%    q_w; q_pb; q_pr; q_s;                       % Sigmoid Steepnesses 15-18
-%    xi_w; xi_pb; xi_pr; xi_s;                   % Sigmoid Shifts 19-22
-%    HI; H_pb; H_pr; H_s;                        % Heart Rate Parameters 23-26
+%    tau; tau_b; taup_p tau_r; tau_s; tau_H;     % Time Constants 9-14
+%    q_w; q_p; q_r; q_s;                         % Sigmoid Steepnesses 15-18
+%    xi_w; xi_p; xi_r; xi_s;                     % Sigmoid Shifts 19-22
+%    HI; H_p; H_r; H_s;                          % Heart Rate Parameters 23-26
 %    HIa; tchar];                                % HR mean after VM 27          
 
 
 % Parameters estimated
-INDMAP   = [11 19 23 24 25 26 27];
-pars; % vector with all parameters including optimized ones
-pars  = exp(pars);
-parsO = pars;
-
+INDMAP   = [23 24 25 26 28];    
+  
 % Randomized initial parameters
-rng('Shuffle');
-rt = -1+2*rand(length(INDMAP),8);
-%pars(INDMAP) = pars(INDMAP).*(1+0.1*rt(:,4));
-pars(INDMAP) = pars(INDMAP);
-pars = log(pars);
+%rng('Shuffle');
+%rt = -1+2*rand(length(INDMAP),8);
+%pars(INDMAP) = pars(INDMAP).*(1+0.1*rt(:,6));
+%pars = log(pars);
 
 % logscale parameters to be estimated
 optx = pars(INDMAP);
@@ -49,7 +45,7 @@ gpars.ALLPARS  = ALLPARS;
 gpars.ODE_TOL  = ODE_TOL;
 gpars.DIFF_INC = DIFF_INC;
 data.gpars = gpars;
-    
+
 % Set optimization hyperparameters and run optimization 
 optub = ub(INDMAP);
 optlb = lb(INDMAP);

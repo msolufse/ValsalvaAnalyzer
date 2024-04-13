@@ -34,7 +34,7 @@ BaselineCorrectedECG = ECGraw - smoothECG2;
 %% Savitsky-Golay Filter 
 
 %Savitsky-Golay Filter filters out very low frequency signals. The window
-%must be odd and within .15 sec 
+%must be odd and within .15 seconds
 SVGwindow = round(.15/dt); 
 if mod(SVGwindow,2) == 0
     SVGwindow = SVGwindow + 1;

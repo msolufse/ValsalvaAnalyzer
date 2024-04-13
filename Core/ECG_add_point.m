@@ -1,7 +1,13 @@
 function [TR,R,TS,S,i]=ECG_add_point(TR,R,TS,S,tc,y) 
+% function ECG_add_point
+% Input: location and value of R (TR, R) and S (TS,S) points within an ECG.
+%        If y > 0 an R point is added else an S point is added.
+% Output: augmented list of R and S points along with their location, and
+% an index i = 0 if the point added is the first point.
+% Description: ECG_add_point adds a R or S point to the list.
+
 % TR - R time points (R>0)
 % TS - S time points (S<0)
-
 if y > 0 % the point is R
     if tc < TR(1)
         TR = [tc TR(1:end)']'; 

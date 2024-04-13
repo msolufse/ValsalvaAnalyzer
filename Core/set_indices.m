@@ -6,13 +6,14 @@ function [phases] = set_indices(Traw,Praw,Tdata,SPdata,Hdata,Rdata,val_start,val
 % Uses:
 % Description: Determines the valsalva maneuver phases
 
-%% TESS
-% Tess note to self - do we need to set the time indices on both the raw
-% data and the sampled data or just the sampled???
-
 close all
-fs = plotmarkers.fs;
-lw = round(plotmarkers.lwt/2);
+fs  = plotmarkers.fs;
+lw  = plotmarkers.lwt;
+if lw > 2
+    lw2 = lw-1;
+else
+    lw2 = 1;
+end;
 figSize = plotmarkers.figSize;
 
 % Time Indices - breath hold start (ts) & breath hold end (te) !!!
@@ -87,11 +88,11 @@ str = {'I','II','III','IV'};
 f = figure(2);
 set(gcf,'units','points','position',figSize);
 f.Units = 'pixels';
-sgtitle(patient, 'Interpreter', 'none')
+sgtitle(patient,'Fontsize',fs,'FontWeight','bold','Interpreter', 'none')
 
 subplot(3,1,1); hold on
     p1 = plot(Traw,Praw,'Color',[0 0.4470 0.7410],'DisplayName','BP');
-    p2 = plot(Tdata,SPdata,'b','LineWidth',2,'DisplayName','Systolic BP');
+    p2 = plot(Tdata,SPdata,'b','LineWidth',lw2,'DisplayName','Systolic BP');
     xline(Tdata(i_ts),'-',' ','LineWidth',1,'LabelVerticalAlignment', 'top','LabelHorizontalAlignment','right','FontSize',fs)
     xline(Tdata(i_t2l),'-',' ','LineWidth',1,'FontSize',fs)
     xline(Tdata(i_t1),'-',' ','LineWidth',1,'FontSize',fs)
@@ -109,7 +110,7 @@ subplot(3,1,1); hold on
     ylim([min(Praw)-5 max(Praw)+5])
 
 subplot(3,1,2); hold on
-    plot(Tdata,Hdata,'b','LineWidth',lw)
+    plot(Tdata,Hdata,'b','LineWidth',lw2)
     xline(Tdata(i_ts),'-',' ','LineWidth',1,'LabelVerticalAlignment', 'top','LabelHorizontalAlignment','right','FontSize',fs)
     xline(Tdata(i_t2l),'-',' ','LineWidth',1,'FontSize',fs)
     xline(Tdata(i_t1),'-',' ','LineWidth',1,'FontSize',fs)
@@ -131,7 +132,7 @@ subplot(3,1,3); hold on;
     xline(Tdata(i_t3),'-',' ','LineWidth',1,'FontSize',fs)
     xline(Tdata(i_t4),'-','','LineWidth',1,'FontSize',fs)
     xline(Tdata(i_PRT),'--','','LineWidth',1,'FontSize',fs)
-    plot(Tdata,Rdata,'b','LineWidth',lw)
+    plot(Tdata,Rdata,'b','LineWidth',lw2)
     set(gca,'Fontsize',fs); 
     xlabel('Time (s)')
     ylabel('Respiration')
@@ -255,7 +256,7 @@ while strcmp(answer,'No ')==1
     f = figure(2);clf
     set(gcf,'units','points','position',figSize)
     f.Units = 'pixels';
-    sgtitle(patient, 'Interpreter', 'none')
+    sgtitle(patient,'Fontsize',fs,'FontWeight','bold','Interpreter', 'none')
     
     subplot(3,1,1); hold on
         p1 = plot(Traw,Praw,'Color',[0 0.4470 0.7410],'DisplayName','BP');

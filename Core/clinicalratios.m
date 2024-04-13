@@ -28,13 +28,13 @@ i_t3  = data.i_t3;    % End of phase 3
 i_t4  = data.i_t4;    % End of phase 4 
 i_PRT = data.i_PRT;   % End of pressure recovery time
 
-% Interval lengths (sec)
-T_1   = Tdata(i_t1)  - Tdata(i_ts);  % length of phase I
-T_2e  = Tdata(i_t2e) - Tdata(i_t1);  % length of early phase II
-T_2l  = Tdata(i_t2l) - Tdata(i_t2e); % length of late phase II
-T_3   = Tdata(i_t3)  - Tdata(i_t2l); % length of phase III
+% Interval lengths (seconds)
+T_1   = Tdata(i_t1)  - Tdata(i_ts);  % length of phase 1
+T_2e  = Tdata(i_t2e) - Tdata(i_t1);  % length of early phase 2
+T_2l  = Tdata(i_t2l) - Tdata(i_t2e); % length of late phase 2
+T_3   = Tdata(i_t3)  - Tdata(i_t2l); % length of phase 3
 T_PRT = Tdata(i_PRT) - Tdata(i_t3);  % pressure recovery time
-T_4   = Tdata(i_t4)  - Tdata(i_t3);  % length of phase IV
+T_4   = Tdata(i_t4)  - Tdata(i_t3);  % length of phase 4
 
 
 %% Systolic blood pressures
@@ -69,7 +69,7 @@ RR2e_Max    = 60/HR2e_min;
 HR2e_end = HRdata(i_t2e);
 RR2e_end = 60/HR2e_end;
 
-% Max HR (min RR) early phase IV
+% Max HR (min RR) early phase 4
 [HR4e_Max,k_HR4e_Max] = max(HRdata(i_t3:i_t3+round(10/dt)));
 i_HR4e_Max  = k_HR4e_Max + i_t3 - 1;
 RR4e_min    = 60/HR4e_Max; 
@@ -97,7 +97,12 @@ RRa_mean = 60./HRa_mean; % After VM
 fs   = plotmarkers.fs;
 fsL  = fs + 3;
 ms   = plotmarkers.ms;
-lwt  = plotmarkers.lwt;
+lw   = plotmarkers.lwt;
+if lw > 2
+    lw2 = lw -1;
+else
+    lw2 = 1;
+end;
 figSize = plotmarkers.figSize;
 
 % Time intervals used for regression lines
@@ -124,17 +129,17 @@ f = figure(1); hold on;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
 subplot(3,1,1); hold on
-   p11 = plot(Tdata(i_SP1_Max),SP1_Max,'co','Markersize',ms,'Linewidth',lwt);
-   p21 = plot(Tdata(i_SP2e_min),SP2e_min,'o','color','#0000FF','Markersize',ms,'Linewidth',lwt);
-   p31 = plot(Tdata(i_t2l_Max),SP2l_Max,'o','color','#7881C2','Markersize',ms,'Linewidth',lwt);
-   p41 = plot(Tdata(i_t2l),SP2l_end,'ko','Markersize',ms,'Linewidth',lwt);
-   p51 = plot(Tdata(i_t3),SP3_end,'o','color','#D95319','Markersize',ms,'Linewidth',lwt);
-   p61 = plot(Tdata(i_SP4e_Max),SP4e_Max,'o','color','#851803','Markersize',ms,'Linewidth',lwt);
+   p11 = plot(Tdata(i_SP1_Max),SP1_Max,'co','Markersize',ms,'Linewidth',lw2);
+   p21 = plot(Tdata(i_SP2e_min),SP2e_min,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
+   p31 = plot(Tdata(i_t2l_Max),SP2l_Max,'o','color','#7881C2','Markersize',ms,'Linewidth',lw2);
+   p41 = plot(Tdata(i_t2l),SP2l_end,'ko','Markersize',ms,'Linewidth',lw2);
+   p51 = plot(Tdata(i_t3),SP3_end,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
+   p61 = plot(Tdata(i_SP4e_Max),SP4e_Max,'o','color','#851803','Markersize',ms,'Linewidth',lw2);
    
    text(xt, yt_BP1,str1,'FontSize',fsL);
    text(xtt,yt_BP2,str2,'FontSize',fsL,'Interpreter', 'none');
    plot(data.Traw,data.Praw,'Color',[.7 .7 .7]);
-   plot(Tdata,SPdata,'k','linewidth',2);
+   plot(Tdata,SPdata,'k','linewidth',lw2);
    xline(Tdata(i_ts),'-',' ','LineWidth',1);
    xline(Tdata(i_t2l),'-',' ','LineWidth',1);
    xline(Tdata(i_t1),'-',' ','LineWidth',1);
@@ -143,7 +148,7 @@ subplot(3,1,1); hold on
    xline(Tdata(i_t4),'-','','LineWidth',1);
    xline(Tdata(i_PRT),'--','','LineWidth',1);
    l1 = plot(Tdata,SP_mean*ones(size(Tdata)),'k--','linewidth',1);
-   text(Tdata(1)+1,SP_mean+10,'Baseline before','fontsize',fs);
+   text(Tdata(1)+1,SP_mean+10,'Baseline','fontsize',fs);
    
    xlim([min(Tdata),max(Tdata)]);
    ylimmin = 5*floor((min(data.Praw)-5)/5);
@@ -157,12 +162,12 @@ subplot(3,1,1); hold on
        '1 Max','2e min','2l Max','2l end','3 end','4e Max','Location','eastoutside');
    
    subplot(3,1,2); hold on
-   plot(Tdata,HRdata,'k','linewidth',2);
-   p12 = plot(Tdata(i_HR2e_min),HR2e_min,'co','Markersize',ms,'Linewidth',lwt);
-   p22 = plot(Tdata(i_t2e),HR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lwt);
-   p42 = plot(Tdata(i_HR4e_Max),HR4e_Max,'o','color','#D95319','Markersize',ms,'Linewidth',lwt);
-   p52 = plot(Tdata(i_HR4e_min),HR4e_min,'o','color','#851803','Markersize',ms,'Linewidth',lwt);
-   p62 = plot(Tdata(i_HR4_min),HR4_min,'o','Color','#77AC30','Markersize',ms,'Linewidth',lwt);
+   plot(Tdata,HRdata,'k','linewidth',lw2);
+   p12 = plot(Tdata(i_HR2e_min),HR2e_min,'co','Markersize',ms,'Linewidth',lw2);
+   p22 = plot(Tdata(i_t2e),HR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
+   p42 = plot(Tdata(i_HR4e_Max),HR4e_Max,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
+   p52 = plot(Tdata(i_HR4e_min),HR4e_min,'o','color','#851803','Markersize',ms,'Linewidth',lw2);
+   p62 = plot(Tdata(i_HR4_min),HR4_min,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
    xline(Tdata(i_ts),'-',' ','LineWidth',1);
    xline(Tdata(i_t2l),'-',' ','LineWidth',1);
    xline(Tdata(i_t1),'-',' ','LineWidth',1);
@@ -178,20 +183,20 @@ subplot(3,1,1); hold on
    ylim([ylimmin ylimmax]);
    
    l2=plot(Tdata(1:i_ts),HRb_mean*ones(size(Tdata(1:i_ts))),'k--','linewidth',1);
-   text(Tdata(1)+1,HRb_mean+10,'Baseline before','fontsize',fs);
+   text(Tdata(1)+1,HRb_mean+20,'Baseline before','fontsize',fs);
    l3=plot(Tdata(i_HR4e_min:end),HRa_mean*ones(size(Tdata(i_HR4e_min:end))),'k--','linewidth',1);
-   text(Tdata(end)-5,HRa_mean+10,'Baseline after','fontsize',fs);
+   text(Tdata(end)-10,HRa_mean+20,'Baseline after','fontsize',fs);
   
    hleglines = [p12,p22,p42,p52,p62];
-   hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Location','eastoutside');
+   hleg=legend(hleglines,'2e min','2e end','4e Max','4e min','4 min','Location','eastoutside');
  
    subplot(3,1,3); hold on
-   plot(Tdata,RRdata,'k','linewidth',2);
-   p13=plot(Tdata(i_HR2e_min),RR2e_Max,'co','Markersize',ms,'Linewidth',lwt);
-   p23=plot(Tdata(i_t2e),RR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lwt);
-   p43=plot(Tdata(i_HR4e_Max),RR4e_min,'o','color','#D95319','Markersize',ms,'Linewidth',lwt);
-   p53=plot(Tdata(i_HR4e_min),RR4e_Max,'o','color','#851803','Markersize',ms,'Linewidth',lwt);
-   p63=plot(Tdata(i_HR4_min),RR4_Max,'o','Color','#77AC30','Markersize',ms,'Linewidth',lwt);
+   plot(Tdata,RRdata,'k','linewidth',lw2);
+   p13=plot(Tdata(i_HR2e_min),RR2e_Max,'co','Markersize',ms,'Linewidth',lw2);
+   p23=plot(Tdata(i_t2e),RR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
+   p43=plot(Tdata(i_HR4e_Max),RR4e_min,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
+   p53=plot(Tdata(i_HR4e_min),RR4e_Max,'o','color','#851803','Markersize',ms,'Linewidth',lw2);
+   p63=plot(Tdata(i_HR4_min),RR4_Max,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
    xline(Tdata(i_ts), '-',' ','LineWidth',1);
    xline(Tdata(i_t2l),'-',' ','LineWidth',1);
    xline(Tdata(i_t1), '-',' ','LineWidth',1);
@@ -208,12 +213,12 @@ subplot(3,1,1); hold on
    ylim([ylimmin ylimmax]);
    
    l4=plot(Tdata(1:i_ts),RRb_mean*ones(size(Tdata(1:i_ts))),'k--','linewidth',1);
-   text(Tdata(1)+1,RRb_mean+0.15,'Baseline before','fontsize',fs);
+   text(Tdata(1)+1,RRb_mean+0.10,'Baseline before','fontsize',fs);
    l5=plot(Tdata(i_HR4e_min:end),RRa_mean*ones(size(Tdata(i_HR4e_min:end))),'k--','linewidth',1);
-   text(Tdata(end)-5,RRa_mean+0.15,'Baseline after','fontsize',fs);
+   text(Tdata(end)-10,RRa_mean+0.10,'Baseline after','fontsize',fs);
 
    rleglines = [p13,p23,p43,p53,p63];
-   rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','Location','eastoutside');   
+   rleg=legend(rleglines,'2e Max','2e end','4e min','4e Max','4 Max','Location','eastoutside');   
    
 %% Point Correction
 answer_CR = questdlg('Do you want to accept markers?', ...
@@ -223,8 +228,8 @@ if strcmp(answer_CR,'Yes') == 0
     liststr = {'SP1 Max','SP2e min','SP2l Max','SP2l end',...
         'SP3 end','SP4e Max','---------','HR2e min','HR2e end'...
         'HR4e Max', 'HR4e min','HR4 min'};
-    prompt  = {'Select point to move',...
-        'Hold control/command to slect multiple',''};
+    prompt  = {'Select marker to move',...
+        'Hold control (PC)/command (Mac)  fto select multiple markers',''};
     [indx,~] = listdlg('PromptString',prompt,...
         'SelectionMode','multiple','ListString',liststr,...
         'ListSize',[200,300],'Name','Point Selection');
@@ -239,7 +244,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p11)
-            p11 = plot(Tdata(i_SP1_Max),SP1_Max,'co','Markersize',ms,'Linewidth',lwt);
+            p11 = plot(Tdata(i_SP1_Max),SP1_Max,'co','Markersize',ms,'Linewidth',lw2);
             delete(pleg)
             pleglines = [p11,p21,p31,p41,p51,p61];
             pleg=legend(pleglines,...
@@ -254,7 +259,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p21)
-            p21=plot(Tdata(i_SP2e_min),SP2e_min,'o','color','#0000FF','Markersize',ms,'Linewidth',lwt);
+            p21=plot(Tdata(i_SP2e_min),SP2e_min,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
             delete(pleg)
             pleglines = [p11,p21,p31,p41,p51,p61];
             pleg=legend(pleglines,...
@@ -269,7 +274,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p31)
-            p31=plot(Tdata(i_t2l_Max),SP2l_Max,'o','color','#7881C2','Markersize',ms,'Linewidth',lwt);
+            p31=plot(Tdata(i_t2l_Max),SP2l_Max,'o','color','#7881C2','Markersize',ms,'Linewidth',lw2);
             delete(pleg)
             pleglines = [p11,p21,p31,p41,p51,p61];
             pleg=legend(pleglines,...
@@ -284,7 +289,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p41)
-            p41=plot(Tdata(i_SP2l_end),SP2l_end,'ko','Markersize',ms,'Linewidth',lwt);
+            p41=plot(Tdata(i_SP2l_end),SP2l_end,'ko','Markersize',ms,'Linewidth',lw2);
             delete(pleg)
             pleglines = [p11,p21,p31,p41,p51,p61];
             pleg=legend(pleglines,...
@@ -299,7 +304,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p51);
-            p51=plot(Tdata(i_SP3_end),SP3_end,'o','color','#D95319','Markersize',ms,'Linewidth',lwt);
+            p51=plot(Tdata(i_SP3_end),SP3_end,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
             delete(pleg);
             pleglines = [p11,p21,p31,p41,p51,p61];
             pleg=legend(pleglines,...
@@ -314,7 +319,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p61);
-            p61=plot(Tdata(i_SP4e_Max),SP4e_Max,'o','color','#851803','Markersize',ms,'Linewidth',lwt);
+            p61=plot(Tdata(i_SP4e_Max),SP4e_Max,'o','color','#851803','Markersize',ms,'Linewidth',lw2);
             delete(pleg);
             pleglines = [p11,p21,p31,p41,p51,p61];
             pleg=legend(pleglines,...
@@ -328,7 +333,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,2); hold on;
             delete(p12);
-            p12=plot(Tdata(i_HR2e_min),HR2e_min,'co','Markersize',ms,'Linewidth',lwt);
+            p12=plot(Tdata(i_HR2e_min),HR2e_min,'co','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
             hleglines = [p12,p22,p42,p52,p62];
             hleg=legend(hleglines,...
@@ -339,7 +344,7 @@ if strcmp(answer_CR,'Yes') == 0
             subplot(3,1,3); hold on;
             delete(p13)
             RR2e_Max = 60./HR2e_min;
-            p13=plot(Tdata(i_HR2e_min),RR2e_Max,'co','Markersize',ms,'Linewidth',lwt);
+            p13=plot(Tdata(i_HR2e_min),RR2e_Max,'co','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
             rleglines = [p13,p23,p43,p53,p63];
             rleg=legend(rleglines,...
@@ -355,7 +360,7 @@ if strcmp(answer_CR,'Yes') == 0
         figure(1); hold on;    
         subplot(3,1,2); hold on;
             delete (p22);
-            p22=plot(Tdata(i_HR2e_end),HR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lwt);
+            p22=plot(Tdata(i_HR2e_end),HR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
             hleglines = [p12,p22,p42,p52,p62];
             hleg=legend(hleglines,...
@@ -366,7 +371,7 @@ if strcmp(answer_CR,'Yes') == 0
             subplot(3,1,3); hold on;
             delete(p23)
             RR2e_end = 60./HR2e_end;
-            p23=plot(Tdata(i_HR2e_end),RR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lwt);
+            p23=plot(Tdata(i_HR2e_end),RR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
             rleglines = [p13,p23,p43,p53,p63];
             rleg=legend(rleglines,...
@@ -381,7 +386,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,2); hold on;
             delete(p42);
-            p42=plot(Tdata(i_HR4e_Max),HR4e_Max,'o','color','#D95319','Markersize',ms,'Linewidth',lwt);
+            p42=plot(Tdata(i_HR4e_Max),HR4e_Max,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
             hleglines = [p12,p22,p42,p52,p62];
             hleg=legend(hleglines,...
@@ -392,7 +397,7 @@ if strcmp(answer_CR,'Yes') == 0
             subplot(3,1,3); hold on;
             delete(p43)
             RR4e_min = 60./HR4e_Max;
-            p43=plot(Tdata(i_HR4e_Max),RR4e_min,'o','color','#D95319','Markersize',ms,'Linewidth',lwt);
+            p43=plot(Tdata(i_HR4e_Max),RR4e_min,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
             rleglines = [p13,p23,p43,p53,p63];
             rleg=legend(rleglines,...
@@ -407,7 +412,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,2); hold on;
             delete(p52);
-            p52=plot(Tdata(i_HR4e_min),HR4e_min,'o','Color','#851803','Markersize',ms,'Linewidth',lwt);
+            p52=plot(Tdata(i_HR4e_min),HR4e_min,'o','Color','#851803','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
             hleglines = [p12,p22,p42,p52,p62];
             hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Location','eastoutside');
@@ -415,7 +420,7 @@ if strcmp(answer_CR,'Yes') == 0
             subplot(3,1,3); hold on;
             delete(p53)
             RR4e_Max = 60./HR4e_min;
-            p53=plot(Tdata(i_HR4e_min),RR4e_Max,'o','Color','#851803','Markersize',ms,'Linewidth',lwt);
+            p53=plot(Tdata(i_HR4e_min),RR4e_Max,'o','Color','#851803','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
             rleglines = [p13,p23,p43,p53,p63];
             rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','Location','eastoutside');
@@ -427,7 +432,7 @@ if strcmp(answer_CR,'Yes') == 0
             figure(1); hold on;
             subplot(3,1,2); hold on;
             delete(p62);
-            p62=plot(Tdata(i_HR4_min),HR4_min,'o','Color','#77AC30','Markersize',ms,'Linewidth',lwt);
+            p62=plot(Tdata(i_HR4_min),HR4_min,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
             hleglines = [p12,p22,p42,p52,p62];
             hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Location','eastoutside');
@@ -435,7 +440,7 @@ if strcmp(answer_CR,'Yes') == 0
             subplot(3,1,3); hold on;
             delete(p63);
             RR4_Max = 60./HR4_min;
-            p63=plot(Tdata(i_HR4_min),RR4_Max,'o','Color','#77AC30','Markersize',ms,'Linewidth',lwt);
+            p63=plot(Tdata(i_HR4_min),RR4_Max,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
             rleglines = [p13,p23,p43,p53,p63];
             rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','Location','eastoutside');
@@ -533,7 +538,7 @@ x_alpha_BRSa    = Tdata(i_t2e:i_t2l_Max);
 y_alpha_BRSa    = SPdata(i_t2e:i_t2l_Max);
 p_alpha_BRSa    = polyfit(x_alpha_BRSa,y_alpha_BRSa,1);
 yfit_alpha_BRSa = polyval(p_alpha_BRSa,x_alpha_BRSa); 
-alpha_BRSa      = p_alpha_BRSa(1);
+BRSa2lSPTD      = p_alpha_BRSa(1);
 
 %% Palamarchuk et al. 
 % Blood pressure differences
@@ -549,19 +554,19 @@ opp_a  = yfit_alpha_BRSa(end)-yfit_alpha_BRSa(1);
 hyp_a  = sqrt(opp_a^2 + adj_a^2);
 
 % Adrenergic baroreflex sensitivity
-BRSa1 = B / T_PRT; 
-BRSa2 = (A+0.75*B)/T_PRT; 
+BRSa  = B / T_PRT; 
+BRSa1 = (A+0.75*B)/T_PRT; 
 
 % Alpha adrenergic 
-alpha_BRSa1    = T_2l/hyp_a;        
-alpha_BRSa2    = (C * T_2l) / hyp_a; 
-alpha_BRSa_alt = C/T_2l;
+% alpha_BRSa1     = T_2l/hyp_a;        
+% cosalpha_BRSa   = (C * T_2l) / hyp_a; 
+BRSa2lBPTDalt     = C/T_2l; % equivalent to regression line
 
 alpha          = atand(opp_a/adj_a);
 alpha_Area     = adj_a*opp_a/2;
 
 % Traingle early phse IV
-x_beta_BRSa    = Tdata(i_t3:i_PRT); 
+x_beta_BRSa    = Tdata(i_t3:i_PRT);
 y_beta_BRSa    = SPdata(i_t3:i_PRT);
 p_beta_BRSa    = polyfit(x_beta_BRSa,y_beta_BRSa,1);
 yfit_beta_BRSa = polyval(p_beta_BRSa,x_beta_BRSa); 
@@ -571,31 +576,29 @@ opp_b          = yfit_beta_BRSa(end)-yfit_beta_BRSa(1);
 hyp_b          = sqrt(opp_b^2 + adj_b^2);
 
 % Beta adrenergic 
-beta_BRSa1    = T_PRT/hyp_b;        
-beta_BRSa2    = (T_PRT * D)/hyp_b; 
-beta_BRSa_alt = D/T_PRT;
+% beta_BRSa1    = T_PRT/hyp_b;        
+% cosbeta_BRSb  = (T_PRT * D)/hyp_b; 
+BRSv4eSPTDalt   = D/T_PRT; % equivalent to regression line
+
 beta          = atand(opp_b/adj_b); 
 beta_Area     = adj_b*opp_b/2;  
  
 % Alpha and Beta
-BRSa_Area = alpha_Area*beta_Area;
+BRSa_Area = BRSa2lBPTDalt*beta_Area;
 
-% global BRS
-BRSg1    = BRSa1*BRSv2eHRSP;
-BRSg2    = BRSa2*BRSv2eHRSP;
- 
 % Adrenergic global BRS
-abBRS_g = alpha_BRSa*BRSv4eRRSP;
+abBRS_g = BRSa2lBPTDalt*BRSv4eRRSP;
 
 % Adrenergic to vagal global BRS
-abBRS_vg = abBRS_g*BRSv4eRRSP;
+abBRS_vg = abBRS_g*BRSv2eRRSP;
 
+% global BRS
+BRSg     = BRSa *BRSv2eHRSP;
+BRSg1    = BRSa1*BRSv2eHRSP;
+ 
 % Valsalva ratio
 VR = HR4e_Max/HR4_min;
  
-% Cardiovagal baroreceptor sensitivity
-BRSc =  (RR2e_Max-RR2e_end)/(SP1_Max-SP_mean); 
-
 %% Figure properties
 fs   = plotmarkers.fs;
 fsL  = fs + 3;
@@ -618,17 +621,17 @@ RRmax = ceil(max(RRdata)/10)*10+10;
 
 f = figure(1); hold on;
 subplot(3,1,1); hold on
-   p71 = plot(x_BRSv2eSPTD,yfit_BRSv2eSPTD,'linewidth',lwt,'color','#00FFFF') ;
-   p81 = plot(x_alpha_BRSa,yfit_alpha_BRSa,'linewidth',lwt,'color','#0000FF');
-   p101= plot(x_BRSv4eSPTD,yfit_BRSv4eSPTD,'linewidth',lwt,'color','#D95319');
+   p71 = plot(x_BRSv2eSPTD,yfit_BRSv2eSPTD,'linewidth',lw,'color','#00FFFF') ;
+   p81 = plot(x_alpha_BRSa,yfit_alpha_BRSa,'linewidth',lw,'color','#0000FF');
+   p101= plot(x_BRSv4eSPTD,yfit_BRSv4eSPTD,'linewidth',lw,'color','#D95319');
    delete(pleg);
    pleglines = [p11,p21,p31,p41,p51,p61,p71,p81,p101];
    pleg=legend(pleglines,...
          '1 Max','2e min','2l Max',...
          '2l end','3 end','4 Max','reg 2e','reg 2l','reg 4e','Location','eastoutside');
    subplot(3,1,2); hold on
-   p72 = plot(x_BRSv2eHRTD, yfit_BRSv2eHRTD, 'linewidth',lwt,'color','#00FFFF');
-   p82 = plot(x_BRSv4eHRTD, yfit_BRSv4eHRTD, 'linewidth',lwt,'color','#D95319');
+   p72 = plot(x_BRSv2eHRTD, yfit_BRSv2eHRTD, 'linewidth',lw,'color','#00FFFF');
+   p82 = plot(x_BRSv4eHRTD, yfit_BRSv4eHRTD, 'linewidth',lw,'color','#D95319');
    delete(hleg);
    hleglines = [p12,p22,p42,p52,p62,p72,p82];
    hleg=legend(hleglines,...
@@ -637,8 +640,8 @@ subplot(3,1,1); hold on
        '4 min','reg 2e','reg 4e','Location','eastoutside');
             
    subplot(3,1,3); hold on
-   p73 = plot(x_BRSv2eRRTD, yfit_BRSv2eRRTD,'linewidth',lwt,'color','#00FFFF');
-   p83 = plot(x_BRSv4eRRTD, yfit_BRSv4eRRTD,'linewidth',lwt,'color','#D95319');
+   p73 = plot(x_BRSv2eRRTD, yfit_BRSv2eRRTD,'linewidth',lw,'color','#00FFFF');
+   p83 = plot(x_BRSv4eRRTD, yfit_BRSv4eRRTD,'linewidth',lw,'color','#D95319');
    delete(rleg);
    rleglines = [p13,p23,p43,p53,p63,p73,p83];
    rleg=legend(rleglines,...
@@ -654,7 +657,7 @@ subplot(3,1,1); hold on
    Rsqr1  = 1 - SSRes/SSTot;
    
    figFolder = plotmarkers.figFolder;
-   fileName = strcat(patient,'_ratios.png');
+   fileName = strcat(patient,'_ratios.eps');
    fullFileName = fullfile(figFolder,'WS_data',fileName);
    exportgraphics(f,fullFileName);
 
@@ -662,14 +665,26 @@ subplot(3,1,1); hold on
       'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
       'String','Save and exit','fontsize',fs,'Callback',@closeGenButton);
   
-   f2 = figure(2);
-   subplot(1,2,1);
-       h = plot(x_BRSv2eRRSP,y_BRSv2eRRSP,'co',x_BRSv2eRRSP,yfit_BRSv2eRRSP,'c','linewidth',lwt);
-       set(gca,'fontsize',fs);
-       title(strcat('Early Phase II, R^2 = ', num2str(Rsqr1,3)));
-       xlabel('SBP (mmHg)');
-       ylabel('RR (Sec)');
+   uiwait(f)
+   
+   screenSize   = get(0,'screensize');
+   figSizeF2      = screenSize;
+   figSizeF2(1:2) = 0.12*screenSize(3:4);
+   figSizeF2(3)   = 0.4*screenSize(3);
+   figSizeF2(4)   = 0.6*screenSize(4);
+   formatSpec = '%.2f'; 
 
+   %left bottom width height
+   f2 = figure(2);
+   set(gcf,'units','points','position',figSizeF2)
+   f2.Units = 'pixels';
+   sgtitle(str2,'Fontsize',fs,'FontWeight','bold','interpreter','none')
+   subplot(2,1,1);
+       h = plot(x_BRSv2eRRSP,y_BRSv2eRRSP,'co',x_BRSv2eRRSP,yfit_BRSv2eRRSP,'c','linewidth',lw);
+       set(gca,'fontsize',fs);
+       title(strcat('Early Phase II, R^2 =',{' '}, num2str(Rsqr1,formatSpec)));
+       ylabel('RR (s)');
+       xlim([min([x_BRSv2eRRSP' x_BRSv2eRRSP'])-2 max([x_BRSv2eRRSP' x_BRSv2eRRSP'])+2]);
        resobs = (y_BRSv4eRRSP - yfit_BRSv4eRRSP).^2;
        SSRes  = sum(resobs);
        ybar   = mean(y_BRSv4eRRSP);
@@ -677,18 +692,23 @@ subplot(3,1,1); hold on
        SSTot  = sum(resm);
        Rsqr2  = 1 - SSRes/SSTot;
        
-    subplot(1,2,2);
-       h = plot(x_BRSv4eRRSP,y_BRSv4eRRSP,'o',x_BRSv4eRRSP,yfit_BRSv4eRRSP,'color','#D95319','linewidth',lwt);
+    subplot(2,1,2);
+       h = plot(x_BRSv4eRRSP,y_BRSv4eRRSP,'o',x_BRSv4eRRSP,yfit_BRSv4eRRSP,'color','#D95319','linewidth',lw);
        set(gca,'fontsize',fs);
-       title(strcat('Early Phase IV, R^2 = ', num2str(Rsqr2,3)));
+       title(strcat('Early Phase IV, R^2 =',{' '},num2str(Rsqr2,formatSpec)));
        xlabel('SBP (mmHg)');
-       sgtitle(str2,'interpreter','none')
-       
-   fileName = strcat(patient,'_ratios_regresion.png');
+       ylabel('RR (s)');
+       xlim([min([x_BRSv4eRRSP' x_BRSv4eRRSP'])-2 max([x_BRSv4eRRSP' x_BRSv4eRRSP'])+2]);
+      
+   fileName = strcat(patient,'_ratios_regresion.eps');
    fullFileName = fullfile(figFolder,'WS_data',fileName);
    exportgraphics(f2,fullFileName);
-
-   uiwait(f)
+  
+   bbutton = uicontrol('Parent',f2,'Style','pushbutton',...
+      'Position',[25,2,figSize(3)*0.2,figSize(4)*0.05],...
+      'String','Save and exit','fontsize',fs,'Callback',@closeGenButton);
+  
+   uiwait(f2)
 
 %% Outputs 
 % Markers added to data
@@ -702,16 +722,14 @@ ClinicalRatios = table({name},T_1, T_2e, T_2l, T_3, T_PRT, ...
     SP_mean, SP1_Max, SP2e_min, SP2l_Max, SP2l_end, SP3_end, SP4e_Max, ... 
     HRb_mean, HRa_mean, HR2e_min, HR2e_end, HR4e_Max, HR4e_min, HR4_min, VR, ...
     RRb_mean, RRa_mean, RR2e_Max, RR2e_end, RR4e_min, RR4e_Max, RR4_Max, ...
-    BRSv2eHRTD, BRSv2eRRTD, BRSv2eSPTD, BRSv2eHRSP, BRSv2eRRSP, alpha_BRSa, ...
+    BRSv2eHRTD, BRSv2eRRTD, BRSv2eSPTD, BRSv2eHRSP, BRSv2eRRSP, BRSa2lSPTD , ...
     BRSv4eHRTD, BRSv4eRRTD, BRSv4eSPTD, BRSv4eHRSP, BRSv4eRRSP, ...
     A, B, C, D, E, ...
-    BRSa1, BRSa2, ...
-    alpha_BRSa1, beta_BRSa1, ...
-    alpha_BRSa2, beta_BRSa2, ...
-    alpha_BRSa_alt, beta_BRSa_alt, ...
+    BRSa, BRSa1, ...
+    BRSa2lBPTDalt, BRSv4eSPTDalt, ...
     alpha, beta,...
     alpha_Area, beta_Area, BRSa_Area, ...
-    abBRS_g, abBRS_vg, BRSg1, BRSg2);
+    abBRS_g, abBRS_vg, BRSg, BRSg1);
  
  % Save results for each patient in markers
  writetable(ClinicalRatios,strcat('../Markers/',patient,'_markers.xlsx'))

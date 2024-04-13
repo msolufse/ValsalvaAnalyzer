@@ -12,13 +12,19 @@ DIFF_INC = 1e-4;
 %    HIa; tchar];                                % HR mean after VM 27          
 
 cd ../Sensitivities
-N = 2;
+N = 8;
 for i = 1:N
    s = strcat('Ex',num2str(i),'_sens.mat');  
    load(s);
-   
-   INDMAP   = [11 19 23 24 25 27 28];
-   sensN = sens(:,INDMAP);
+   % 9 11 12 20 (9, 12) (11, 12)
+   INDMAP    = [23 24 26 28];     %4 9 10 11 12 13 14 17 (23,27) (22,26) 16 but too insensitive, 13 but too insensitive 
+   %INDMAP   = [9 23 24 26 28];     %4 9 10 11 12 13 14 17 (23,27) (22,26) 16 but too insensitive, 13 but too insensitive 
+   %INDMAP   = [11 23 24 26 28];    %4 9 10 11 12 13 14 17 (23,27) (22,26) 16 but too insensitive, 13 but too insensitive 
+   %INDMAP   = [12 23 24 26 28];    %4 9 10 11 12 13 14 17 (23,27) (22,26) 16 but too insensitive, 13 but too insensitive 
+   %INDMAP   = [20 23 24 26 28];    %4 9 10 11 12 13 14 17 (23,27) (22,26) 16 but too insensitive, 13 but too insensitive 
+   %INDMAP   = [9 12 23 24 26 28];  %4 9 10 11 12 13 14 17 (23,27) (22,26) 16 but too insensitive, 13 but too insensitive 
+   %INDMAP   = [11 20 23 24 26 28]; %4 9 10 11 12 13 14 17 (23,27) (22,26) 16 but too insensitive, 13 but too insensitive 
+   sensN = sens(:,INDMAP); % parameter 8
    [U,S,V] = svd(sensN, 0);
    svals=diag(S);
    svals./svals(1);
@@ -45,7 +51,7 @@ for i = 1:N
    end;
 
    rn = triu(r,1); % extract upper triangular part of the matrix
-   [i,j] = find(abs(rn)>0.90); % parameters with a value bigger than 0.85 are correlated
+   [i,j] = find(abs(rn)>0.9); % parameters with a value bigger than 0.85 are correlated
                                 
    disp('correlated parameters');
    for k = 1:length(i)

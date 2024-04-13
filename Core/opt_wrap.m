@@ -26,7 +26,6 @@ function [jac] = diffjac(x,f,f0,data)
 %
 % This code comes with no guarantee or warranty of any kind.
 %
-
 % inputs:
 %          x, f = point and function
 %          f0   = f(x), preevaluated

@@ -13,12 +13,10 @@ fs = plotmarkers.fs;
 lw = plotmarkers.lwt;
 figSize = plotmarkers.figSize;
 if lw > 2
-  lw2 = lw - 1;
-elseif lw == 2
-  lw2 = lw-1;
+    lw2 = lw-1;
 else
-  lw2 = lw;
-end
+    lw2 =1;
+end;
 
 %% load temporary workspace and assign vectors
 filename = strcat(patient,'_WS_temp.mat');
@@ -30,9 +28,6 @@ ECGraw = raw_data.ECGraw;
 Hraw   = raw_data.Hraw;
 Praw   = raw_data.Praw;
 
-% Note: HR is 60 over RR, the raw HR from LabChart is not used. 
-% TJ: WHAT IS MISSING?
-% We should rename it to match the others and indicate that it is a raw signal
 RRint   = diff(sort(TR));
 HR      = 60./RRint;
 
@@ -40,7 +35,7 @@ HR      = 60./RRint;
 f = figure(1); clf; hold on;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
-sgtitle(patient,'Interpreter','none')
+sgtitle(patient,'Fontsize',fs+2,'FontWeight','bold','Interpreter','none')
 sub1 = subplot(2,1,1); hold on;
     plot(T_RRint,HR,'bo-','linewidth',lw2);
     set(gca,'fontsize',fs)
@@ -49,18 +44,17 @@ sub1 = subplot(2,1,1); hold on;
     ylim([min(HR)-5 max(HR)+5]);
 
 sub2 = subplot(2,1,2); hold on;
-    plot(Traw,ECGraw,'b-','linewidth',1)
+    plot(Traw,ECGraw,'b-')
     set(gca,'fontsize',fs)
     xlabel('Time (s)')
     ylabel('ECG (mV)')
     xlim([Traw(1),Traw(end)])
-
 linkaxes([sub1, sub2],'x')
 
 figFolder = plotmarkers.figFolder;
-fileName = strcat(patient,'HeartRateECG.png');
+fileName = strcat(patient,'_HeartRateECG');
 fullFileName = fullfile(figFolder,'WS_data',fileName);
-saveas(f,fullFileName);
+saveas(f,fullFileName,'epsc');
 
 bbutton = uicontrol('Parent',f,'Style','pushbutton',...
     'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
@@ -87,14 +81,38 @@ function [] = closeButton(a,~)
     close(f)
 end % function close botton %
 
-
-function [] = correctButton(a,~)  
+function [] = correctButton(a,~) 
+    
     [HR_new,answer_HR] = correct_HR(HR,Traw,T_RRint,patient,plotmarkers);
     
-    if strcmp(answer_HR,'Yes') == 1
-        f = a.Parent;
-        close(f)
-    end    
+    f = figure(1); clf; hold on;
+    set(gcf,'units','points','position',figSize)
+    f.Units = 'pixels';
+    sgtitle(patient,'Fontsize',fs+2,'FontWeight','bold','Interpreter','none')
+    sub1 = subplot(2,1,1); hold on;
+        plot(T_RRint,HR_new,'bo-','linewidth',lw2);
+        set(gca,'fontsize',fs)
+        ylabel('HR (bpm)')
+        xlim([Traw(1),Traw(end)])
+        ylim([min(HR)-5 max(HR)+5]);
+    sub2 = subplot(2,1,2); hold on;
+        plot(Traw,ECGraw,'b-')
+        set(gca,'fontsize',fs)
+        xlabel('Time (s)')
+        ylabel('ECG (mV)')
+        xlim([Traw(1),Traw(end)])
+        
+    linkaxes([sub1, sub2],'x')
+
+    figFolder = plotmarkers.figFolder;
+    fileName = strcat(patient,'_HeartRateECG');
+    fullFileName = fullfile(figFolder,'WS_data',fileName);
+    saveas(f,fullFileName,'epsc');
+
+    bbutton = uicontrol('Parent',f,'Style','pushbutton',...
+    'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
+    'String','Save and exit','fontsize',fs,'Callback',@closeGenButton);
+   
 end % function correct botton %
 
 end % function create_WS_HR %
