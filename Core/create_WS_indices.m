@@ -360,7 +360,7 @@ subplot(3,1,3); hold on;
   ylim(Pthlims)
   
   figFolder = plotmarkers.figFolder;
-  fileName = strcat(patient,'_VMphases.eps');
+  fileName = strcat(patient,'_VMphases.png');
   fullFileName = fullfile(figFolder,'Data',fileName);
   exportgraphics(f,fullFileName);
    
