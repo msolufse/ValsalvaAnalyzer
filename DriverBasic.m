@@ -2,7 +2,8 @@ function DriverBasic
 % Input: none
 % Output: generated figures and excel file with analyzed data
 % Description: Runs software
-
+% The source file to be executed to run the ValsalvaAnalyzer developed by
+% Mette Olufsen, Professor of Mathematics, NC State University
 clear all
 close all
 warning off
