@@ -26,7 +26,6 @@ DIFF_INC = sqrt(ODE_TOL);
 %    HI; H_p; H_r; H_s;                          % Heart Rate Parameters 23-26
 %    HIa; tchar];                                % HR mean after VM 27          
 
-
 % Parameters estimated
 INDMAP   = [23 24 25 26 28];    
   

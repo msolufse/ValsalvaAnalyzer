@@ -1,4 +1,4 @@
-function [ClinicalRatios,data] = clinicalratios(data,plotmarkers)
+function clinicalratios(patient,plotmarkers)
 % function clinicalratios 
 % Input: data and plotmarkers (structure with figure and screen settings)
 % Output: table with clinical ratios, and amended data structure. This
@@ -7,12 +7,13 @@ function [ClinicalRatios,data] = clinicalratios(data,plotmarkers)
 % Uses: closeGenButton to close figures
 % Description: Runs software
 
-% Patient name
-patient   = data.patient;
+load(strcat('../WS/',patient,'_WS_temp.mat'), 'data','pat_char','raw_data');
 
 % Values extracted from data
 Tdata     = data.Tdata;  % Time (vector)
 SPdata    = data.SPdata; % Systolic blood pressure (vector)
+DPdata    = data.DPdata; % Diastolic blood pressure (vector)
+PPdata    = SPdata - DPdata;  % Pulse pressure (vector)
 HRdata    = data.HRdata; % Heart rate (vector)
 RRdata    = data.RRdata; % RR intervals (vector)
 SP_mean   = data.SPbar;  % Mean systolic blood pressure before VM (value)
@@ -72,7 +73,9 @@ RR2e_end = 60/HR2e_end;
 % Max HR (min RR) early phase 4
 [HR4e_Max,k_HR4e_Max] = max(HRdata(i_t3:i_t3+round(10/dt)));
 i_HR4e_Max  = k_HR4e_Max + i_t3 - 1;
-RR4e_min    = 60/HR4e_Max; 
+RR4e_min    = 60/HR4e_Max;
+[HR_Max,i_HR_Max] = max(HRdata);
+RR_min       = 60/HR_Max;
 
 % min HR (max RR) early phase 4 
 [HR4e_min,k_HR4e_min] = min(HRdata(i_HR4e_Max:i_HR4e_Max+round(3/dt))); 
@@ -90,8 +93,26 @@ RR4_Max   = 60/HR4_min;
 
 % Mean HR and RR intervals 
 HRa_mean= mean(HRdata(i_HR4e_min:end)); % After VM
-RRb_mean = 60./HRb_mean; % Before VM
-RRa_mean = 60./HRa_mean; % After VM
+RRb_mean = 60./HRb_mean*1000; % Before VM (ms)
+RRa_mean = 60./HRa_mean*1000; % After VM (ms)
+
+%% Pulse pressure
+
+% Mean PP rest before VM
+PPbar_b = mean(PPdata(1:i_ts));
+
+% Phase I (maximum)
+PP1_Max   = PPdata(i_SP1_Max);
+
+% Early phase II (minimum)
+PP2e_min  = PPdata(i_SP2e_min);
+
+% Early phase IV (Max)
+PP4e_Max = max(PPdata(i_t3:i_t3+round(5/dt)));
+
+% Mean PP rest after VM
+PPbar_a = mean(PPdata(i_HR4e_min:end));
+
 
 %% Figure properties
 fs   = plotmarkers.fs;
@@ -102,7 +123,7 @@ if lw > 2
     lw2 = lw -1;
 else
     lw2 = 1;
-end;
+end
 figSize = plotmarkers.figSize;
 
 % Time intervals used for regression lines
@@ -168,6 +189,7 @@ subplot(3,1,1); hold on
    p42 = plot(Tdata(i_HR4e_Max),HR4e_Max,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
    p52 = plot(Tdata(i_HR4e_min),HR4e_min,'o','color','#851803','Markersize',ms,'Linewidth',lw2);
    p62 = plot(Tdata(i_HR4_min),HR4_min,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
+   p72 = plot(Tdata(i_HR_Max),HR_Max,'mo','Markersize',ms,'Linewidth',lw2);
    xline(Tdata(i_ts),'-',' ','LineWidth',1);
    xline(Tdata(i_t2l),'-',' ','LineWidth',1);
    xline(Tdata(i_t1),'-',' ','LineWidth',1);
@@ -187,8 +209,8 @@ subplot(3,1,1); hold on
    l3=plot(Tdata(i_HR4e_min:end),HRa_mean*ones(size(Tdata(i_HR4e_min:end))),'k--','linewidth',1);
    text(Tdata(end)-5,HRa_mean+10,'Baseline after','fontsize',fs);
   
-   hleglines = [p12,p22,p42,p52,p62];
-   hleg=legend(hleglines,'2e min','2e end','4e Max','4e min','4 min','Location','eastoutside');
+   hleglines = [p12,p22,p42,p52,p62,p72];
+   hleg=legend(hleglines,'2e min','2e end','4e Max','4e min','4 min','Max','Location','eastoutside');
  
    subplot(3,1,3); hold on
    plot(Tdata,RRdata,'k','linewidth',lw2);
@@ -197,6 +219,7 @@ subplot(3,1,1); hold on
    p43=plot(Tdata(i_HR4e_Max),RR4e_min,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
    p53=plot(Tdata(i_HR4e_min),RR4e_Max,'o','color','#851803','Markersize',ms,'Linewidth',lw2);
    p63=plot(Tdata(i_HR4_min),RR4_Max,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
+   p73=plot(Tdata(i_HR_Max),RR_min,'mo','Markersize',ms,'Linewidth',lw2);
    xline(Tdata(i_ts), '-',' ','LineWidth',1);
    xline(Tdata(i_t2l),'-',' ','LineWidth',1);
    xline(Tdata(i_t1), '-',' ','LineWidth',1);
@@ -217,8 +240,8 @@ subplot(3,1,1); hold on
    l5=plot(Tdata(i_HR4e_min:end),RRa_mean*ones(size(Tdata(i_HR4e_min:end))),'k--','linewidth',1);
    text(Tdata(end)-5,RRa_mean+0.15,'Baseline after','fontsize',fs);
 
-   rleglines = [p13,p23,p43,p53,p63];
-   rleg=legend(rleglines,'2e Max','2e end','4e min','4e Max','4 Max','Location','eastoutside');   
+   rleglines = [p13,p23,p43,p53,p63,p73];
+   rleg=legend(rleglines,'2e Max','2e end','4e min','4e Max','4 Max','min','Location','eastoutside');   
    
 %% Point Correction
 answer_CR = questdlg('Do you want to accept markers?', ...
@@ -227,7 +250,7 @@ answer_CR = questdlg('Do you want to accept markers?', ...
 if strcmp(answer_CR,'Yes') == 0
     liststr = {'SP1 Max','SP2e min','SP2l Max','SP2l end',...
         'SP3 end','SP4e Max','---------','HR2e min','HR2e end'...
-        'HR4e Max', 'HR4e min','HR4 min'};
+        'HR4e Max', 'HR4e min','HR4 min','HR Max'};
     prompt  = {'Select marker to move',...
         'Hold control/command to select multiple markers',''};
     [indx,~] = listdlg('PromptString',prompt,...
@@ -241,6 +264,7 @@ if strcmp(answer_CR,'Yes') == 0
             uiwait(msgbox("Select phase I max SBP","modal"));
             [new_ind,SP1_Max] = ginput(1);
             [~,i_SP1_Max] = min(abs(Tdata-new_ind));
+            PP1_Max = PPdata(i_SP1_Max);
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p11)
@@ -256,6 +280,7 @@ if strcmp(answer_CR,'Yes') == 0
             uiwait(msgbox("Select early phase II min SBP","modal"));
             [new_ind,SP2e_min] = ginput(1);
             [~,i_SP2e_min] = min(abs(Tdata-new_ind));
+            PP2e_min  = PPdata(i_SP2e_min);
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p21)
@@ -316,6 +341,7 @@ if strcmp(answer_CR,'Yes') == 0
             uiwait(msgbox("Select early phase IV max SBP","modal"));
             [new_ind,SP4e_Max] = ginput(1);
             [~,i_SP4e_Max] = min(abs(Tdata-new_ind));
+            PP4e_Max = PPdata(i_SP4e_Max);
             figure(1); hold on;
             subplot(3,1,1); hold on;
             delete(p61);
@@ -335,49 +361,50 @@ if strcmp(answer_CR,'Yes') == 0
             delete(p12);
             p12=plot(Tdata(i_HR2e_min),HR2e_min,'co','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
-            hleglines = [p12,p22,p42,p52,p62];
+            hleglines = [p12,p22,p42,p52,p62,p72];
             hleg=legend(hleglines,...
                 '2e min','2e end',...
                 '4e Max','4e min',...
-                '4 min','Location','eastoutside');
+                '4 min','Max','Location','eastoutside');
 
             subplot(3,1,3); hold on;
             delete(p13)
             RR2e_Max = 60./HR2e_min;
             p13=plot(Tdata(i_HR2e_min),RR2e_Max,'co','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
-            rleglines = [p13,p23,p43,p53,p63];
+            rleglines = [p13,p23,p43,p53,p63,p73];
             rleg=legend(rleglines,...
                 '2e Max','2e end',...
                 '4e min','4e Max',...
-                '4 Max','Location','eastoutside');
+                '4 Max','min','Location','eastoutside');
              
         elseif strcmp(list{i},'HR2e end') == 1
             uiwait(msgbox("Select early phase II end HR","modal"));
             [new_ind,HR2e_end] = ginput(1);
             [~,i_HR2e_end] = min(abs(Tdata-new_ind));
 
-        figure(1); hold on;    
-        subplot(3,1,2); hold on;
+            figure(1); hold on; 
+           
+            subplot(3,1,2); hold on;
             delete (p22);
             p22=plot(Tdata(i_HR2e_end),HR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
-            hleglines = [p12,p22,p42,p52,p62];
+            hleglines = [p12,p22,p42,p52,p62,p72];
             hleg=legend(hleglines,...
                 '2e min','2e end',...
                 '4e Max','4e min',...
-                '4 min','Location','eastoutside');
+                '4 min','Max','Location','eastoutside');
             
             subplot(3,1,3); hold on;
             delete(p23)
             RR2e_end = 60./HR2e_end;
             p23=plot(Tdata(i_HR2e_end),RR2e_end,'o','color','#0000FF','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
-            rleglines = [p13,p23,p43,p53,p63];
+            rleglines = [p13,p23,p43,p53,p63,p73];
             rleg=legend(rleglines,...
                 '2e Max','2e end',...
                 '4e min','4e Max',...
-                '4 Max','Location','eastoutside');
+                '4 Max','min','Location','eastoutside');
         
         elseif strcmp(list{i},'HR4e Max') == 1
             uiwait(msgbox("Select early phase IV max HR","modal"));
@@ -388,22 +415,22 @@ if strcmp(answer_CR,'Yes') == 0
             delete(p42);
             p42=plot(Tdata(i_HR4e_Max),HR4e_Max,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
-            hleglines = [p12,p22,p42,p52,p62];
+            hleglines = [p12,p22,p42,p52,p62,p72];
             hleg=legend(hleglines,...
                 '2e min','2e Max',...
                 '4e Max','4e min',...
-                '4 min','Location','eastoutside');
+                '4 min','Max','Location','eastoutside');
             
             subplot(3,1,3); hold on;
             delete(p43)
             RR4e_min = 60./HR4e_Max;
             p43=plot(Tdata(i_HR4e_Max),RR4e_min,'o','color','#D95319','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
-            rleglines = [p13,p23,p43,p53,p63];
+            rleglines = [p13,p23,p43,p53,p63,p73];
             rleg=legend(rleglines,...
                 '2e Max','2e min',...
                 '4e min','4e Max',...
-                '4 Max','Location','eastoutside');
+                '4 Max','min','Location','eastoutside');
             
         elseif strcmp(list{i},'HR4e min') == 1
             uiwait(msgbox("Select early phase IV min HR","modal"));
@@ -414,16 +441,16 @@ if strcmp(answer_CR,'Yes') == 0
             delete(p52);
             p52=plot(Tdata(i_HR4e_min),HR4e_min,'o','Color','#851803','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
-            hleglines = [p12,p22,p42,p52,p62];
-            hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Location','eastoutside');
+            hleglines = [p12,p22,p42,p52,p62,p72];
+            hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Max','Location','eastoutside');
             
             subplot(3,1,3); hold on;
             delete(p53)
             RR4e_Max = 60./HR4e_min;
             p53=plot(Tdata(i_HR4e_min),RR4e_Max,'o','Color','#851803','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
-            rleglines = [p13,p23,p43,p53,p63];
-            rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','Location','eastoutside');
+            rleglines = [p13,p23,p43,p53,p63,p73];
+            rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','min','Location','eastoutside');
             
         elseif strcmp(list{i},'HR4 min') == 1
             uiwait(msgbox("Select phase IV min HR","modal"));
@@ -434,16 +461,36 @@ if strcmp(answer_CR,'Yes') == 0
             delete(p62);
             p62=plot(Tdata(i_HR4_min),HR4_min,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
             delete(hleg);
-            hleglines = [p12,p22,p42,p52,p62];
-            hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Location','eastoutside');
+            hleglines = [p12,p22,p42,p52,p62,p72];
+            hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Max','Location','eastoutside');
             
             subplot(3,1,3); hold on;
             delete(p63);
             RR4_Max = 60./HR4_min;
             p63=plot(Tdata(i_HR4_min),RR4_Max,'o','Color','#77AC30','Markersize',ms,'Linewidth',lw2);
             delete(rleg);
-            rleglines = [p13,p23,p43,p53,p63];
-            rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','Location','eastoutside');
+            rleglines = [p13,p23,p43,p53,p63,p73];
+            rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','min','Location','eastoutside');
+        
+        elseif strcmp(list{i},'HR Max') == 1
+            uiwait(msgbox("Select Max HR","modal"));
+            [new_ind,HR_Max] = ginput(1);
+            [~,i_HR_Max] = min(abs(Tdata-new_ind));
+            figure(1); hold on;
+            subplot(3,1,2); hold on;
+            delete(p72);
+            p72=plot(Tdata(i_HR_Max),HR_Max,'mo','Markersize',ms,'Linewidth',lw2);
+            delete(hleg);
+            hleglines = [p12,p22,p42,p52,p62,p72];
+            hleg=legend(hleglines,'2e min','2e Max','4e Max','4e min','4 min','Max','Location','eastoutside');
+            
+            subplot(3,1,3); hold on;
+            delete(p73);
+            RR_min = 60./HR_Max;
+            p73=plot(Tdata(i_HR_Max),RR_min,'mo','Markersize',ms,'Linewidth',lw2);
+            delete(rleg);
+            rleglines = [p13,p23,p43,p53,p63,p73];
+            rleg=legend(rleglines,'2e Max','2e min','4e min','4e Max','4 Max','min','Location','eastoutside');
         end
     end
 end
@@ -454,31 +501,57 @@ HRa_mean = mean(HRdata(i_HR4e_min:end)); % After VM
 RRb_mean = 60./HRb_mean; % Before VM
 RRa_mean = 60./HRa_mean; % After VM
 
-
 %% Vagal baroreflex phase 2 early
-i_reg2e_b = max(i_SP1_Max,i_HR2e_min);
-i_reg2e_e = min(i_SP2e_min,i_t2e);
-
-% BRSv2 (HR to Tdata)
-x_BRSv2eHRTD    = Tdata (i_HR2e_min:i_reg2e_e);
-y_BRSv2eHRTD    = HRdata(i_HR2e_min:i_reg2e_e); 
+x_BRSv2eHRTD    = Tdata (i_HR2e_min:i_t2e);
+y_BRSv2eHRTD    = HRdata(i_HR2e_min:i_t2e); 
 p_BRSv2eHRTD    = polyfit(x_BRSv2eHRTD,y_BRSv2eHRTD,1);
 yfit_BRSv2eHRTD = polyval(p_BRSv2eHRTD,x_BRSv2eHRTD); 
 BRSv2eHRTD      = p_BRSv2eHRTD(1);  % Slope
 
+% R_2 calculations of BRSv2 (HR to Tdata)
+resobs_BRSv2eHRTD = (y_BRSv2eHRTD - yfit_BRSv2eHRTD).^2;
+SSRes_BRSv2eHRTD  = sum(resobs_BRSv2eHRTD);
+ybar_BRSv2eHRTD   = mean(y_BRSv2eHRTD);
+resm_BRSv2eHRTD   = (y_BRSv2eHRTD - ybar_BRSv2eHRTD).^2;
+SSTot_BRSv2eHRTD  = sum(resm_BRSv2eHRTD);
+R2_BRSv2eHRTD     = 1 - SSRes_BRSv2eHRTD / SSTot_BRSv2eHRTD;
+
 % BRSv2 (RR to Tdata)
-x_BRSv2eRRTD    = Tdata (i_HR2e_min:i_reg2e_e); 
-y_BRSv2eRRTD    = RRdata(i_HR2e_min:i_reg2e_e); 
+x_BRSv2eRRTD    = Tdata (i_HR2e_min:i_t2e); 
+y_BRSv2eRRTD    = RRdata(i_HR2e_min:i_t2e); 
 p_BRSv2eRRTD    = polyfit(x_BRSv2eRRTD,y_BRSv2eRRTD,1);
 yfit_BRSv2eRRTD = polyval(p_BRSv2eRRTD,x_BRSv2eRRTD);  
 BRSv2eRRTD      = p_BRSv2eRRTD(1)*1000;  % Slope
 
+% R_2 calculations of BRSv2 (RR to Tdata)
+resobs_BRSv2eRRTD = (y_BRSv2eRRTD - yfit_BRSv2eRRTD).^2;
+SSRes_BRSv2eRRTD  = sum(resobs_BRSv2eRRTD);
+ybar_BRSv2eRRTD   = mean(y_BRSv2eRRTD);
+resm_BRSv2eRRTD   = (y_BRSv2eRRTD - ybar_BRSv2eRRTD).^2;
+SSTot_BRSv2eRRTD  = sum(resm_BRSv2eRRTD);
+R2_BRSv2eRRTD     = 1 - SSRes_BRSv2eRRTD / SSTot_BRSv2eRRTD;
+
 % BRSv2 (SP to Tdata)
-x_BRSv2eSPTD    = Tdata (i_reg2e_b:i_reg2e_e);
-y_BRSv2eSPTD    = SPdata(i_reg2e_b:i_reg2e_e); 
+x_BRSv2eSPTD    = Tdata (i_SP1_Max:i_t2e);
+y_BRSv2eSPTD    = SPdata(i_SP1_Max:i_t2e); 
 p_BRSv2eSPTD    = polyfit(x_BRSv2eSPTD,y_BRSv2eSPTD,1);
 yfit_BRSv2eSPTD = polyval(p_BRSv2eSPTD,x_BRSv2eSPTD);
 BRSv2eSPTD      = p_BRSv2eSPTD(1);  % Slope
+
+% R_2 calculations of BRSv2 (SP to Tdata)
+resobs_BRSv2eSPTD = (y_BRSv2eSPTD - yfit_BRSv2eSPTD).^2;
+SSRes_BRSv2eSPTD  = sum(resobs_BRSv2eSPTD);
+ybar_BRSv2eSPTD   = mean(y_BRSv2eSPTD);
+resm_BRSv2eSPTD   = (y_BRSv2eSPTD - ybar_BRSv2eSPTD).^2;
+SSTot_BRSv2eSPTD  = sum(resm_BRSv2eSPTD);
+R2_BRSv2eSPTD     = 1 - SSRes_BRSv2eSPTD / SSTot_BRSv2eSPTD;
+
+% Overlapping segments early phase 2
+i_reg2e_b = max(i_SP1_Max,i_HR2e_min); % Overlapping segment start
+i_reg2e_e = min(i_SP2e_min,i_t2e);     % Overlapping segment end
+
+% Time BP drop to HR increase
+dtoff_2e = Tdata(i_SP1_Max)-Tdata(i_HR2e_min);
 
 % BRSv (RR to SP)
 x_BRSv2eRRSP    = SPdata(i_reg2e_b:i_reg2e_e);
@@ -487,12 +560,28 @@ p_BRSv2eRRSP    = polyfit(x_BRSv2eRRSP,y_BRSv2eRRSP,1);
 yfit_BRSv2eRRSP = polyval(p_BRSv2eRRSP,x_BRSv2eRRSP);
 BRSv2eRRSP      = p_BRSv2eRRSP(1)*1000; % Slope note converted to ms
 
+% R_2 calculations of BRSv (RR to SP)
+resobs_BRSv2eRRSP = (y_BRSv2eRRSP - yfit_BRSv2eRRSP).^2;
+SSRes_BRSv2eRRSP  = sum(resobs_BRSv2eRRSP);
+ybar_BRSv2eRRSP   = mean(y_BRSv2eRRSP);
+resm_BRSv2eRRSP   = (y_BRSv2eRRSP - ybar_BRSv2eRRSP).^2;
+SSTot_BRSv2eRRSP  = sum(resm_BRSv2eRRSP);
+R2_BRSv2eRRSP     = 1 - SSRes_BRSv2eRRSP / SSTot_BRSv2eRRSP;
+
 % BRSv (HR to SP)
 x_BRSv2eHRSP    = SPdata(i_reg2e_b:i_reg2e_e); 
 y_BRSv2eHRSP    = HRdata(i_reg2e_b:i_reg2e_e); 
 p_BRSv2eHRSP    = polyfit(x_BRSv2eHRSP,y_BRSv2eHRSP,1);
 yfit_BRSv2eHRSP = polyval(p_BRSv2eHRSP,x_BRSv2eHRSP);
 BRSv2eHRSP      = p_BRSv2eHRSP(1);  % Slope
+
+% R_2 calculations of BRSv (HR to SP)
+resobs_BRSv2eHRSP = (y_BRSv2eHRSP - yfit_BRSv2eHRSP).^2;
+SSRes_BRSv2eHRSP  = sum(resobs_BRSv2eHRSP);
+ybar_BRSv2eHRSP   = mean(y_BRSv2eHRSP);
+resm_BRSv2eHRSP   = (y_BRSv2eHRSP - ybar_BRSv2eHRSP).^2;
+SSTot_BRSv2eHRSP  = sum(resm_BRSv2eHRSP);
+R2_BRSv2eHRSP     = 1 - SSRes_BRSv2eHRSP / SSTot_BRSv2eHRSP;
 
 %% Vagal baroreflex phase 4 early
 % HR vs Tdata
@@ -502,12 +591,28 @@ p_BRSv4eHRTD    = polyfit(x_BRSv4eHRTD,y_BRSv4eHRTD,1);
 yfit_BRSv4eHRTD = polyval(p_BRSv4eHRTD,x_BRSv4eHRTD);
 BRSv4eHRTD      = p_BRSv4eHRTD(1); % Slope 
 
+% R_2 calculations of HR vs Tdata
+resobs_BRSv4eHRTD = (y_BRSv4eHRTD - yfit_BRSv4eHRTD).^2;
+SSRes_BRSv4eHRTD  = sum(resobs_BRSv4eHRTD);
+ybar_BRSv4eHRTD   = mean(y_BRSv4eHRTD);
+resm_BRSv4eHRTD   = (y_BRSv4eHRTD - ybar_BRSv4eHRTD).^2;
+SSTot_BRSv4eHRTD  = sum(resm_BRSv4eHRTD);
+R2_BRSv4eHRTD     = 1 - SSRes_BRSv4eHRTD / SSTot_BRSv4eHRTD;
+
 % RR vs Tdata
 x_BRSv4eRRTD    = Tdata (i_HR4e_Max:i_HR4e_min); 
 y_BRSv4eRRTD    = RRdata(i_HR4e_Max:i_HR4e_min); 
 p_BRSv4eRRTD    = polyfit(x_BRSv4eRRTD,y_BRSv4eRRTD,1);
 yfit_BRSv4eRRTD = polyval(p_BRSv4eRRTD,x_BRSv4eRRTD);
-BRSv4eRRTD      = p_BRSv4eRRTD(1); % Slope 
+BRSv4eRRTD      = p_BRSv4eRRTD(1)*1000; % Slope 
+
+% R_2 calculations of RR vs Tdata
+resobs_BRSv4eRRTD = (y_BRSv4eRRTD - yfit_BRSv4eRRTD).^2;
+SSRes_BRSv4eRRTD  = sum(resobs_BRSv4eRRTD);
+ybar_BRSv4eRRTD   = mean(y_BRSv4eRRTD);
+resm_BRSv4eRRTD   = (y_BRSv4eRRTD - ybar_BRSv4eRRTD).^2;
+SSTot_BRSv4eRRTD  = sum(resm_BRSv4eRRTD);
+R2_BRSv4eRRTD     = 1 - SSRes_BRSv4eRRTD / SSTot_BRSv4eRRTD;
 
 % BP vs Tdata
 x_BRSv4eSPTD    = Tdata(i_t3:i_SP4e_Max); 
@@ -516,7 +621,17 @@ p_BRSv4eSPTD    = polyfit(x_BRSv4eSPTD,y_BRSv4eSPTD,1);
 yfit_BRSv4eSPTD = polyval(p_BRSv4eSPTD,x_BRSv4eSPTD);
 BRSv4eSPTD      = p_BRSv4eSPTD(1); % Slope 
 
+% R_2 calculations of BP vs Tdata
+resobs_BRSv4eSPTD = (y_BRSv4eSPTD - yfit_BRSv4eSPTD).^2;
+SSRes_BRSv4eSPTD  = sum(resobs_BRSv4eSPTD);
+ybar_BRSv4eSPTD   = mean(y_BRSv4eSPTD);
+resm_BRSv4eSPTD   = (y_BRSv4eSPTD - ybar_BRSv4eSPTD).^2;
+SSTot_BRSv4eSPTD  = sum(resm_BRSv4eSPTD);
+R2_BRSv4eSPTD     = 1 - SSRes_BRSv4eSPTD / SSTot_BRSv4eSPTD;
+
 % BP vs RR
+dtoff_4e = Tdata(i_HR4e_Max)-Tdata(i_t3); % Time from phase 3 end to max heart rate early phase 4
+
 ix4 = max(i_t3,i_HR4e_Max);
 iy4 = min(i_SP4e_Max,i_HR4e_min);
 x_BRSv4eRRSP    = SPdata(ix4:iy4);
@@ -525,6 +640,14 @@ p_BRSv4eRRSP    = polyfit(x_BRSv4eRRSP,y_BRSv4eRRSP,1);
 yfit_BRSv4eRRSP = polyval(p_BRSv4eRRSP,x_BRSv4eRRSP);
 BRSv4eRRSP      = p_BRSv4eRRSP(1)*1000; % Slope
 
+% R_2 calculations of BP vs RR
+resobs_BRSv4eRRSP = (y_BRSv4eRRSP - yfit_BRSv4eRRSP).^2;
+SSRes_BRSv4eRRSP  = sum(resobs_BRSv4eRRSP);
+ybar_BRSv4eRRSP   = mean(y_BRSv4eRRSP);
+resm_BRSv4eRRSP   = (y_BRSv4eRRSP - ybar_BRSv4eRRSP).^2;
+SSTot_BRSv4eRRSP  = sum(resm_BRSv4eRRSP);
+R2_BRSv4eRRSP     = 1 - SSRes_BRSv4eRRSP / SSTot_BRSv4eRRSP;
+
 % BP vs HR
 x_BRSv4eHRSP    = SPdata(ix4:iy4); 
 y_BRSv4eHRSP    = HRdata(ix4:iy4); 
@@ -532,12 +655,28 @@ p_BRSv4eHRSP    = polyfit(x_BRSv4eHRSP,y_BRSv4eHRSP,1);
 yfit_BRSv4eHRSP = polyval(p_BRSv4eHRSP,x_BRSv4eHRSP);
 BRSv4eHRSP      = p_BRSv4eHRSP(1); % Slope
  
+% R_2 calculations of BP vs HR
+resobs_BRSv4eHRSP = (y_BRSv4eHRSP - yfit_BRSv4eHRSP).^2;
+SSRes_BRSv4eHRSP  = sum(resobs_BRSv4eHRSP);
+ybar_BRSv4eHRSP   = mean(y_BRSv4eHRSP);
+resm_BRSv4eHRSP   = (y_BRSv4eHRSP - ybar_BRSv4eHRSP).^2;
+SSTot_BRSv4eHRSP  = sum(resm_BRSv4eHRSP);
+R2_BRSv4eHRSP     = 1 - SSRes_BRSv4eHRSP / SSTot_BRSv4eHRSP;
+
 %% Adrenergic baroreflex late phase 2
 x_alpha_BRSa    = Tdata(i_t2e:i_t2l_Max); 
 y_alpha_BRSa    = SPdata(i_t2e:i_t2l_Max);
 p_alpha_BRSa    = polyfit(x_alpha_BRSa,y_alpha_BRSa,1);
 yfit_alpha_BRSa = polyval(p_alpha_BRSa,x_alpha_BRSa); 
-BRSa2lSPTD      = p_alpha_BRSa(1);
+BRSa2lSPTD      = p_alpha_BRSa(1); % Slope
+
+% R_2 calculations
+resobs_alpha_BRSa = (y_alpha_BRSa - yfit_alpha_BRSa).^2;
+SSRes_alpha_BRSa  = sum(resobs_alpha_BRSa);
+ybar_alpha_BRSa   = mean(y_alpha_BRSa);
+resm_alpha_BRSa   = (y_alpha_BRSa - ybar_alpha_BRSa).^2;
+SSTot_alpha_BRSa  = sum(resm_alpha_BRSa);
+R2_BRSa2lSPTD     = 1 - SSRes_alpha_BRSa / SSTot_alpha_BRSa;
 
 %% Palamarchuk et al. 
 % Blood pressure differences
@@ -588,7 +727,8 @@ BRSg     = BRSa *(BRSv2eRRSP/1000); % BRSa (mmHg/s)  * (s/mmHg)
 BRSg1    = BRSa1*(BRSv2eRRSP/1000); % BTSa1 (mmHg/s) * (s/mmHg)
 
 % Valsalva ratio
-VR = HR4e_Max/HR4_min;
+VR1 = HR4e_Max/HR4_min;
+VR2 = HR_Max/HR4_min;
  
 %% Figure properties
 fs   = plotmarkers.fs;
@@ -621,24 +761,24 @@ subplot(3,1,1); hold on
          '1 Max','2e min','2l Max',...
          '2l end','3 end','4 Max','reg 2e','reg 2l','reg 4e','Location','eastoutside');
    subplot(3,1,2); hold on
-   p72 = plot(x_BRSv2eHRTD, yfit_BRSv2eHRTD, 'linewidth',lw,'color','#00FFFF');
-   p82 = plot(x_BRSv4eHRTD, yfit_BRSv4eHRTD, 'linewidth',lw,'color','#D95319');
+   p82 = plot(x_BRSv2eHRTD, yfit_BRSv2eHRTD, 'linewidth',lw,'color','#00FFFF');
+   p92 = plot(x_BRSv4eHRTD, yfit_BRSv4eHRTD, 'linewidth',lw,'color','#D95319');
    delete(hleg);
-   hleglines = [p12,p22,p42,p52,p62,p72,p82];
+   hleglines = [p12,p22,p42,p52,p62,p72,p82,p92];
    hleg=legend(hleglines,...
        '2e min','2e Max',...
        '4e Max','4e min',...
-       '4 min','reg 2e','reg 4e','Location','eastoutside');
+       '4 min','Max','reg 2e','reg 4e','Location','eastoutside');
             
    subplot(3,1,3); hold on
-   p73 = plot(x_BRSv2eRRTD, yfit_BRSv2eRRTD,'linewidth',lw,'color','#00FFFF');
-   p83 = plot(x_BRSv4eRRTD, yfit_BRSv4eRRTD,'linewidth',lw,'color','#D95319');
+   p83 = plot(x_BRSv2eRRTD, yfit_BRSv2eRRTD,'linewidth',lw,'color','#00FFFF');
+   p93 = plot(x_BRSv4eRRTD, yfit_BRSv4eRRTD,'linewidth',lw,'color','#D95319');
    delete(rleg);
-   rleglines = [p13,p23,p43,p53,p63,p73,p83];
+   rleglines = [p13,p23,p43,p53,p63,p73,p83,p93];
    rleg=legend(rleglines,...
        '2e Max','2e min',...
        '4e min','4e Max',...
-       '4 Max','reg 2e','reg 4e','Location','eastoutside');
+       '4 Max','min','reg 2e','reg 4e','Location','eastoutside');
   
    resobs = (y_BRSv2eRRSP - yfit_BRSv2eRRSP).^2;
    SSRes  = sum(resobs);
@@ -667,7 +807,7 @@ subplot(3,1,1); hold on
 
    f2 = figure(2);
    set(gcf,'units','points','position',figSizeF2)
-   f2.Units = 'pixels';
+   f2.Units = 'pixels'; 
    sgtitle(str2,'Fontsize',fs,'FontWeight','bold','interpreter','none')
        
    subplot(1,2,1);
@@ -706,25 +846,37 @@ data.i_HR4e_min = i_HR4e_min;
 data.Hbara      = HRa_mean;
 data.i_HR4e_Max = i_HR4e_Max;        
 
+% Change units to milliseconds
+RR2e_Max = RR2e_Max*1000;
+RR2e_end = RR2e_end*1000;
+RR4e_min = RR4e_min*1000;
+RR4e_Max = RR4e_Max*1000;
+RR4_Max  = RR4_Max*1000;
+
 name = patient;
 
 ClinicalRatios = table({name},T_1, T_2e, T_2l, T_3, T_PRT, ... 
-    SP_mean, SP1_Max, SP2e_min, SP2l_Max, SP2l_end, SP3_end, SP4e_Max, ... 
-    HRb_mean, HRa_mean, HR2e_min, HR2e_end, HR4e_Max, HR4e_min, HR4_min, VR, ...
+    SP_mean, SP1_Max, SP2e_min, SP2l_Max, SP2l_end, SP3_end, SP4e_Max, ...
+    HRb_mean, HRa_mean, HR2e_min, HR2e_end, HR4e_Max, HR4e_min, HR4_min, HR_Max, VR1, VR2, ...
     RRb_mean, RRa_mean, RR2e_Max, RR2e_end, RR4e_min, RR4e_Max, RR4_Max, ...
-    BRSv2eHRTD, BRSv2eRRTD, BRSv2eSPTD, BRSv2eHRSP, BRSv2eRRSP, BRSa2lSPTD , ...
-    BRSv4eHRTD, BRSv4eRRTD, BRSv4eSPTD, BRSv4eHRSP, BRSv4eRRSP, ...
+    BRSv2eHRTD, R2_BRSv2eHRTD, BRSv2eRRTD, R2_BRSv2eRRTD, ...
+    BRSv2eSPTD, R2_BRSv2eSPTD, BRSv2eHRSP, R2_BRSv2eHRSP, ...
+    BRSv2eRRSP, R2_BRSv2eRRSP, BRSa2lSPTD, R2_BRSa2lSPTD, ...
+    BRSv4eHRTD, R2_BRSv4eHRTD, BRSv4eRRTD, R2_BRSv4eRRTD, ...
+    BRSv4eSPTD, R2_BRSv4eSPTD, BRSv4eHRSP, R2_BRSv4eHRSP, ...
+    BRSv4eRRSP, R2_BRSv4eRRSP, ...
     A, B, C, D, E, ...
     BRSa, BRSa1, ...
     alpha_BRSa, beta_BRSa, ...
     alpha, beta,...
     alpha_Area, beta_Area, BRSa_Area, ...
-    BRSg, BRSg1);
- 
+    BRSg, BRSg1); 
+
  % Save results for each patient in markers
  writetable(ClinicalRatios,strcat('../Markers/',patient,'_markers.xlsx'))
  
  % Appending workspace
- save(strcat('../WS/',patient,'_WS.mat'),'data','-append');
+ 
+ save(strcat('../WS/',patient,'_WS.mat'),'data','pat_char','raw_data');
  
 end % function clinicalratios %

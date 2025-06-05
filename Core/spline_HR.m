@@ -21,7 +21,7 @@ if lw > 2
     lw2 = lw -1;
 else
     lw2 = 1;
-end;
+end
 
 % Linear spline
 tA = T_RRint(i_xR(1)); 

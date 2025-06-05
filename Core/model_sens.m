@@ -1,4 +1,4 @@
-function [sens,sens_norm,Rsens,Isens] = model_sens(pars,data,plotmarkers)
+function [sens,sens_norm,Rsens,Isens] = model_sens(pars,data,plotmarkers,patient)
 %function model_sens
 %Input: model parameters, data structure, and figure setttings
 %Output: sensitivity matrix (sens) and normalized sensitivities.
@@ -15,7 +15,7 @@ lw = plotmarkers.lwt;
 figSize = plotmarkers.figSize;
 
 % Patient name
-patient = data.patient;
+% patient = data.patient;
 
 % Computing sensitivities wrt model residual
 disp('Sensitivity analysis: It takes about a minute ...');

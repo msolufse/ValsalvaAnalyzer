@@ -2,7 +2,7 @@ function [TR,TS,R,S] = correct_ECG(patient,Traw,ECGraw,TR,TS,R,S,plotmarkers)
 % function correct_ECG
 % Input: patient name, vectors with time (Traw), ECG signal (ECGraw) times
 % and values for R and S peaks as well as figure setting (plotmarkers)
-% Output: corrected vectos and times for R and S peaks
+% Output: corrected vectors and times for R and S peaks
 % Interactive function removing spurious and adding missing R and S peaks.
 % Uses: ECG_add_point and ECG_delete_point to add and remove wrong ECG R
 % and S points.
@@ -17,12 +17,12 @@ if lw > 2
     lw2 = lw-1;
 else
     lw2 =1;
-end;
+end
 if lw > 2
     lw3 = 1;
 else
     lw3 = 0.75;
-end;
+end
 
 %% Loop correcting ECG
 notdone = true;
@@ -43,7 +43,7 @@ while notdone
     xlim([Traw(1), 15])
     xlabel('Time (s)')
     ylabel('Raw ECG (mV)')
-    title(patient,'Inspect ECG (scrolling - enter to continue)','interpreter','none')
+    title(patient,'interpreter','none')
     str1 = {'Number of S points: ',num2str(nS)};
     str2 = {'Number of R points: ',num2str(nR)};
     a1 = annotation('textbox', [0.91, 0.4, 0, 0], 'string', str1,'fontsize',fs);
@@ -52,15 +52,26 @@ while notdone
     yL=ylim;
     pan on
     bgcolor = f.Color;
-    pause;
+    %pause;
     
     % Clicking correction code
     answer_ECG = questdlg('Do you want to correct RS points?', ...
         'ECG wave correction','Yes','No','Yes');
+
     answer_repeat = 'Yes';
     if strcmp(answer_ECG,'Yes')==1
         while strcmp(answer_repeat,'Yes') == 1
-            uiwait(msgbox("Click on point to correct",'modal'));
+            f = figure(1); hold on
+            title(patient,'scrolling (enter when done)')
+            pan on
+            pause;  
+
+            title(patient,'Place cross-hair on point to change')
+            
+            if ismember(findall(0,'type','figure'),f) == 0
+                return
+            end
+
             [qr,y] = ginput(1);
             answer_QS = questdlg('Add or remove point?', ...
                 'ECG wave correction','Add','Remove','Cancel','Cancel');
@@ -95,7 +106,7 @@ while notdone
             a1 = annotation('textbox', [0.91, 0.4, 0, 0], 'string', str1,'fontsize',fs);
             a2 = annotation('textbox', [0.91, 0.9, 0, 0], 'string', str2,'fontsize',fs);
             
-            title('Continue inspecting points - press enter when done');
+            title(patient,'Continue inspecting points - press enter when done');
             
             figure(1); hold on
             if exist('a_new','var') == 1

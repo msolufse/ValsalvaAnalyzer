@@ -17,7 +17,7 @@ if y > 0 % the point is R
         [~,i] = max(find(TR<tc));
         TR = [TR(1:i)' tc TR(i+1:end)']';
         R  = [R(1:i)' y R(i+1:end)']';
-    end;
+    end
 elseif y < 0 % point is S
     if tc < TS(1)
        TS  = [tc TS(1:end)']'; 
@@ -31,7 +31,7 @@ elseif y < 0 % point is S
         TS = [TS(1:end)' tc]';
         S  = [S(1:end)'  y]';
         i  = length(TS);
-    end;
+    end
 end
 
 end

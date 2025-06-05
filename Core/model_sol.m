@@ -12,7 +12,7 @@ pars = exp(pars);
 % Unpack data structure 
 Tdata   = data.Tdata;
 SPdata  = data.SPdata;
-PPdata  = data.PPdata; 
+PPdata  = data.PPdata;
 Pthdata = data.Pthdata; 
 Hdata   = data.HRdata; 
 dSPdt   = data.dSBPdt; 

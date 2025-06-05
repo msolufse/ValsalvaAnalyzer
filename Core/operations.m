@@ -7,7 +7,7 @@ scp = strcmp(call_flag,'12. Summary');
 
 if scp ~= 1
     for i = 1:length(list)
-      close all         
+      close all
       patient  = list{i}(1:end-4);
      
       switch call_flag
@@ -33,26 +33,23 @@ if scp ~= 1
             close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
         case '6.  VM Phases'
-            data = create_WS_indices(patient,plotmarkers);
+            create_WS_indices(patient,plotmarkers);
             close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
-        case '7.  Clinical Ratios'  
-            load(strcat('../WS/',patient,'_WS.mat'), 'data');
-            
-            [ClinicalRatios] = clinicalratios(data,plotmarkers);
+        case '7.  Clinical Ratios'
+            clinicalratios(patient,plotmarkers);
             close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         case '8.  Model Prediction (Nominal)'
             load(strcat('../WS/',patient,'_WS.mat'), 'data');
-
             % Get nominal parameter values
-            [pars,data] = parameters(data); 
+            [data,pars] = parameters(data); 
             
             % Run forward model with nominal parameter values 
             [HR,~,~,Outputs] = model_sol(pars,data);  
             
-            % Plot forward model with nominal parameter values 
-            plot_model(patient,Outputs,HR,data,pars,0,plotmarkers); 
+            % Plot forward model with nominal parameter values
+            plot_model(patient,Outputs,HR,data,pars,0,plotmarkers);
             close all;
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         case '9.  Sensitivity Analysis'
@@ -60,8 +57,8 @@ if scp ~= 1
             load(strcat('../WS/',patient,'_WS.mat'), 'data');
            
             % Get nominal parameter values
-            [pars,data] = parameters(data);
-            [sens,sens_norm,Rsens,Isens] = model_sens(pars,data,plotmarkers); 
+            [data,pars] = parameters(data);
+            [sens,sens_norm,Rsens,Isens] = model_sens(pars,data,plotmarkers,patient); 
             
             save(strcat('../Sensitivities/',patient,'_sens.mat'),'sens','sens_norm','Rsens','Isens');
             close all;
@@ -71,7 +68,7 @@ if scp ~= 1
             load(strcat('../WS/',patient,'_WS.mat'), 'data')
         
             % Get nominal parameter values
-            [pars,data] = parameters(data);
+            [data, pars] = parameters(data);
             
             [optpars,opt_info] = model_opt(pars,data);
             
@@ -93,7 +90,7 @@ if scp ~= 1
                     load(strcat('../WS/',patient,'_WS.mat'), 'data');
                     
                     % Get nominal parameter values
-                    [pars,data] = parameters(data);
+                    [data,pars] = parameters(data);
                     
                     % Run forward model with nominal parameter values
                     [HR,~,~,Outputs] = model_sol(pars,data);
@@ -107,7 +104,7 @@ if scp ~= 1
                     load(strcat('../WS/',patient,'_WS.mat'), 'data');
 
                     % Get nominal parameter values
-                    [pars,data] = parameters(data);
+                    [data] = parameters(data);
                     
                     % Load optimized paramters
                     load(strcat('../Optimized/',patient,'_opt.mat'))

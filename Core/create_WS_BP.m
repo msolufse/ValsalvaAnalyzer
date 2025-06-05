@@ -8,29 +8,31 @@ function data = create_WS_BP(patient,plotmarkers)
 % pressures. Saves figures, generates a workspace, and augments the data
 % structure.
 
-global Traw Praw
+% global Traw Praw
 
-% Load temporary workspace
-load(strcat('../WS/',patient,'_WS_temp.mat'),'Traw','Praw');
+%% Load temporary workspace and assign vectors
+load(strcat('../WS/',patient,'_WS_temp.mat'));
 
-% Figure properties
+Traw   = raw_data.Traw-raw_data.Traw(1);
+Praw   = raw_data.Praw;
+%% Figure properties
 fs = plotmarkers.fs;
 lw = plotmarkers.lwt;
 if lw > 2
     lw2 = lw -1;
 else
     lw2 = 1;
-end;
+end
 ms = plotmarkers.ms;
 figSize = plotmarkers.figSize;
 
-% Correcting systolic and diastoloic blood pressure signals
+%% Correcting systolic and diastoloic blood pressure signals
 [SPinds, DPinds] = period_test(Traw,Praw,patient,plotmarkers);
 PrawOrg = Praw;
 SPindsOrg = SPinds;
 DPindsOrg = DPinds;
 
-% plot results
+%% Plot results
 f = figure(2); clf; hold on
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
@@ -222,14 +224,24 @@ bbutton = uicontrol('Parent',f,'Style','pushbutton',...
     'String','Save and exit','fontsize',fs,'Callback',@closeGenButton);
 
 uiwait(f)
-    
+
+%% Save temporary workspace
 SPinds = unique(SPinds);
 DPinds = unique(DPinds);
 SPraw  = interp1(Traw(SPinds),Praw(SPinds),Traw,'pchip');
 DPraw  = interp1(Traw(DPinds),Praw(DPinds),Traw,'pchip');
 PPraw  = SPraw - DPraw;
 
+data.PrawOrg = PrawOrg;
+data.SPindsOrg = SPindsOrg;
+data.SPinds = SPinds;
+data.DPindsOrg = DPindsOrg;
+data.DPinds = DPinds;
+data.SPraw = SPraw;
+data.DPraw = DPraw;
+data.PPraw = PPraw;
+
 s = strcat('../WS/',patient,'_WS_temp.mat');
-save(s,'Traw','Praw','PrawOrg','SPindsOrg','SPinds','DPindsOrg','DPinds','SPraw','DPraw','PPraw','-append');
+save(s,'data','-append');
 
 end % function create_WS_BP.m %

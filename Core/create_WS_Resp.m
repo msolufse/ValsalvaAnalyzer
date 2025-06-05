@@ -5,9 +5,18 @@ function [] = create_WS_Resp(patient,plotmarkers)
 % Description: Generates respiratory signal from ECG data using algorithm
 % from Randall et al. (ADD REFERENCE)
 
-%% Load temporary workspace
+%% Load temporary workspace and assign vectors
 filename = strcat(patient,'_WS_temp.mat');
-load(strcat('../WS/',filename),'R','TR','S','TS','Traw','T_RRint','RRint','HRdata','RRdata'); % load patient info
+%load(strcat('../WS/',filename),'R','TR','S','TS','Traw','PthAvail'); % load patient info
+load(strcat('../WS/',filename));
+
+Traw        = raw_data.Traw0;
+% PthAvail    = raw_data.PthAvail; %%%%%%% still need to integrate code that uses this
+
+R           = data.R;
+TR          = data.TR;
+S           = data.S;
+TS          = data.TS;
 
 %% Figure properties
 fs = plotmarkers.fs;
@@ -19,7 +28,7 @@ dt = mean(diff(Traw));
 Fs = round(1/dt); 
 
 % Find amplitude as difference of R- and S-waves
-RS  = R-S;
+RS  = R - S;
 TRs = sort(TR);
 TQs = sort(TS);
 
@@ -41,7 +50,7 @@ TRS = TRS(xRS);
 
 % Include first and last time points for piecewise cubic Hermite splines 
 RS  = [RS(1); RS; RS(end)];
-TRS = [Traw(1); TRS; Traw(end)]; 
+TRS = [Traw(1); TRS; Traw(end)];
 
 % Use PCHIP algorithm to interpolate through amplitudes (this algorithm
 % preserves derivative behavior)
@@ -118,14 +127,14 @@ if isempty(find(newT == Traw(1) | newT == Traw(end),1)) == 1
     newR = [ss(Traw(1)); newR; ss(Traw(end))]; 
 end
 Rspline = griddedInterpolant(newT,newR,'pchip');
-Rdata   = Rspline(Traw); 
+Rraw   = Rspline(Traw); 
 
 %% Plot results
 f = figure(1); clf; hold on;
 set(gcf,'units','points','position',figSize)
 f.Units = 'pixels';
 title(patient,'Interpreter','none'); hold on;
-plot(Traw,Rdata,'b-','Linewidth',lw);
+plot(Traw,Rraw,'b-','Linewidth',lw);
 set(gca,'fontsize',fs)
 xlim([Traw(1),Traw(end)])
 ylabel('Respiration')
@@ -143,8 +152,9 @@ bbutton = uicontrol('Parent',f,'Style','pushbutton',...
 uiwait(f)
 
 %% Save temporary workspace
+data.Rraw = Rraw;
+
 s = strcat('../WS/',patient,'_WS_temp.mat');
-save(s,'Rdata','-append');
+save(s,'data','-append');
 
 end % function create_WS_Resp.m %
-

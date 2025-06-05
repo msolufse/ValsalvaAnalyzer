@@ -17,8 +17,10 @@ Hraw   = raw_data.Hraw;
 Praw   = raw_data.Praw;
 
 Traw = Traw -Traw(1); % ensure that the time starts at zero
+raw_data.Traw0 = Traw;
+
 dt   = mean(diff(Traw)); 
-Fs   = round(1/dt); 
+raw_data.dt = dt;
 
 %% Determines baseline of ECG signal with medfilt1
 
@@ -89,8 +91,14 @@ nS = length(S);
 T_RRint = sort(TR(1:end-1));
 RRint   = diff(sort(TR));
 
+data.R  = R;
+data.TR = TR;
+data.S  = S;
+data.TS = TS;
+data.RRint = RRint;
+data.T_RRint = T_RRint;
+
 % Save temporary workspace
 s = strcat('../WS/',patient,'_WS_temp.mat');
-save(s,'ECGraw','Traw','Hraw',...
-    'Praw','dt','R','TR','S','TS','T_RRint','RRint','-append');
+save(s,'raw_data','data','-append');
 end % function create_WS_ECG.m %

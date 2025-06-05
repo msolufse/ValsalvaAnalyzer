@@ -157,22 +157,22 @@ subplot(2,2,4); hold on;
     xlim(Tlims)
     ylim([0 1]);
 
-    figFolder = plotmarkers.figFolder;
+    %figFolder = plotmarkers.figFolder;
 
-    if opt_flag == 1
-        fileName = strcat(patient,'_optimized.png');
-        fullFileName = fullfile(figFolder,'Model_fits',fileName);
-    elseif opt_flag == 0
-        fileName = strcat(patient,'_nominal.png');
-        fullFileName = fullfile(figFolder,'Model_fits',fileName);
-    end
-    exportgraphics(f,fullFileName);
+    %if opt_flag == 1
+    %    fileName = strcat(patient,'_optimized.png');
+    %    fullFileName = fullfile(figFolder,'Model_fits',fileName);
+    %elseif opt_flag == 0
+    %    fileName = strcat(patient,'_nominal.png');
+    %    fullFileName = fullfile(figFolder,'Model_fits',fileName);
+    %end
+    %exportgraphics(f,fullFileName);
      
-     bbutton = uicontrol('Parent',f,'Style','pushbutton',...
-        'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
-        'String','Save and exit','Fontsize',fs,'Callback',@closeGenButton);
-
-    uiwait(f);
+    %bbutton = uicontrol('Parent',f,'Style','pushbutton',...
+    %    'Position',[25,10,figSize(3)*0.25,figSize(4)*0.05],...
+    %    'String','Save and exit','Fontsize',fs,'Callback',@closeGenButton);
+    %
+    %uiwait(f);
 
 end % function plot_model.m %
 

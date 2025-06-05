@@ -6,29 +6,32 @@ function [] = create_WS_HR(patient,plotmarkers)
 % Description: loads temporary workspace with corrected ECG data calculates
 % heart rate and saves temporary workspace with Heart rate output
 
-global raw_data RRint T_RRint sub1 sub2 TR HR_new
+% nested functions bc using user info (blue color is not global just bc of
+% nested)
 
-% Figure properties
+global HR_new % has to be global because of nested functions
+
+%% Figure properties
 fs = plotmarkers.fs;
 lw = plotmarkers.lwt;
 figSize = plotmarkers.figSize;
+
 if lw > 2
     lw2 = lw-1;
 else
     lw2 =1;
-end;
+end
 
-%% load temporary workspace and assign vectors
+%% Load temporary workspace and assign vectors
 filename = strcat(patient,'_WS_temp.mat');
-load(strcat('../WS/',filename),'raw_data','RRint','T_RRint','TR'); 
+load(strcat('../WS/',filename),'data','raw_data'); 
 
-Traw   = raw_data.Traw;
-Traw   = Traw -Traw(1);
+Traw   = raw_data.Traw0;    % time starts at zero
 ECGraw = raw_data.ECGraw;
-Hraw   = raw_data.Hraw;
-Praw   = raw_data.Praw;
 
-RRint   = diff(sort(TR));
+RRint   = data.RRint;
+T_RRint = data.T_RRint;
+
 HR      = 60./RRint;
 
 %% ECG to HR Calculations
@@ -48,9 +51,7 @@ sub2 = subplot(2,1,2); hold on;
     set(gca,'fontsize',fs)
     xlabel('Time (s)')
     ylabel('ECG (mV)')
-    ylim([-1.25e-3 1.25e-3]);
     xlim([Traw(1),Traw(end)])
-    ylim([-1.25e-3 1.25e-3]);
 linkaxes([sub1, sub2],'x')
 
 figFolder = plotmarkers.figFolder;
@@ -68,14 +69,6 @@ cbutton = uicontrol('Parent',f,'Style','pushbutton',...
 
 uiwait(f)
 
-% Interpolate over step function and evaluate at Tdata
-HRdata = interp1(T_RRint,HR_new,Traw,'pchip');
-
-% Use HR to find RR intervals
-RRdata = 60./HRdata;
-
-s = strcat('../WS/',patient,'_WS_temp.mat');
-save(s,'HRdata','RRdata','-append');
 
 function [] = closeButton(a,~)
     f = a.Parent;
@@ -85,7 +78,7 @@ end % function close botton %
 
 function [] = correctButton(a,~) 
     
-    [HR_new,answer_HR] = correct_HR(HR,Traw,T_RRint,patient,plotmarkers);
+    [HR_new] = correct_HR(HR,Traw,T_RRint,patient,plotmarkers);
     
     f = figure(1); clf; hold on;
     set(gcf,'units','points','position',figSize)
@@ -104,7 +97,7 @@ function [] = correctButton(a,~)
         xlabel('Time (s)')
         ylabel('ECG (mV)')
         xlim([Traw(1),Traw(end)])
-        ylim([-1.25e-3 1.25e-3]);
+        %ylim([-1.25e-3 1.25e-3]);
         
     linkaxes([sub1, sub2],'x')
 
@@ -119,5 +112,27 @@ function [] = correctButton(a,~)
    
 end % function correct botton %
 
+% Interpolate over step function and evaluate at Tdata
+HRraw = interp1(T_RRint,HR_new,Traw,'pchip');
+
+% Use HR to find RR intervals
+RRraw = 60./HRraw;
+
+
+%% Save temporary workspace
+% data.HR     = HR;
+% data.HR_new = HR_new;   
+raw_data.HRraw = HRraw;   % user corrected HR data
+data.RRraw     = RRraw;
+
+plotmarkers.fs = fs;
+plotmarkers.figSize = figSize;
+plotmarkers.sub1 = sub1;
+plotmarkers.sub2 = sub2;
+plotmarkers.lw2 = lw2;
+
+% Save temporary workspace
+s = strcat('../WS/',patient,'_WS_temp.mat');
+save(s,'data','raw_data','plotmarkers','-append');
 end % function create_WS_HR %
 

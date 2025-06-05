@@ -1,4 +1,4 @@
-function [pars,data] = parameters(data)
+function [data,pars] = parameters(data)
 % function parameters.m
 % Input: data structure
 % Outout: list of model parameters and augmented data structure
@@ -10,9 +10,15 @@ data.DIFF_INC = sqrt(1e-6);
 
 % Initial mean values
 SPbar  = data.SPbar;
+PPbar  = data.PPbar;
+Pthbar = data.Pthbar;
 HminR  = data.HminR; 
 HmaxR  = data.HmaxR; 
-Hbar   = data.Hbar; 
+Hbar   = data.Hbar;
+HRdata = data.HRdata;
+Tdata  = data.Tdata;
+i_HR4e_min = data.i_HR4e_min;
+i_HR4e_Max = data.i_HR4e_Max; 
 
 % Model parameters
 D  = 0.75; 
@@ -41,27 +47,27 @@ q_r  = 1;
 q_s  = 10;   
 
 % Patient specific parameters
-xi_w  = D * SPbar + (1 - D) * data.PPbar;           
-xi_r  = data.Pthbar;  
+xi_w  = D * SPbar + (1 - D) * PPbar;           
+xi_r  = Pthbar;  
 
 % Intrinsic HR
-HI     = data.HminR; 
-iH_I   = data.i_HR4e_Max;  
-tchar  = data.Tdata(floor(iH_I));
+HI     = HminR; 
+iH_I   = i_HR4e_Max;  
+tchar  = Tdata(floor(iH_I));
 
 % Maximal HR
-HM  = 1.5*max(data.HRdata);    
+HM  = 1.5*max(HRdata);    
 H_s = (1/K_s)*(HM/HI - 1); 
 
 % At end of expiration and inspiration
-Gr_ss = 1/(1 + exp(q_r*(data.Pthbar - xi_r)));
+Gr_ss = 1/(1 + exp(q_r*(Pthbar - xi_r)));
 
 Tr_ss  = K_r*Gr_ss; 
 H_r    = (HmaxR - HminR)/HI/Tr_ss ;
 
 % Calculate sigmoid shifts
 Pc_ss  = xi_w; 
-Pa_ss  = xi_w - data.Pthbar; 
+Pa_ss  = xi_w - Pthbar; 
 
 ewc_ss = 1 - sqrt((1 + exp(-q_w*(Pc_ss - xi_w)))/(A + exp(-q_w*(Pc_ss - xi_w)))); 
 ewa_ss = 1 - sqrt((1 + exp(-q_w*(Pa_ss - xi_w)))/(A + exp(-q_w*(Pa_ss - xi_w)))); 
@@ -79,7 +85,7 @@ xi_p  = n_ss + log(K_p/Tp_ss - 1)/q_p;
 xi_s  = n_ss - log(K_s/Ts_ss - 1)/q_s;   
 
 H_p   = (H_r*Tr_ss + H_s*Ts_ss)/Tp_ss;
-HIa   = min(data.HRdata(data.i_HR4e_min:end));
+HIa   = min(HRdata(i_HR4e_min:end));
 
 % Parameter vector (output)
 pars = [D; B;                                   % Convex combination parameters 1-2

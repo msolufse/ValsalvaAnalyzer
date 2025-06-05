@@ -87,32 +87,32 @@ end
 % Find time for end of phase IV
 % Select the point at which the SBP returns to baseline after the overshoot
 k_t4  = find(SPdata(i_PRT+1:end) <= SPbar, 1, 'first');
+k_t4
 if isempty(k_t4) == 0
     i_t4  = i_PRT+1 + k_t4;
     T4    = i_t4*dt;
 end
 MinP4 = 10;
 MaxP4 = 30/dt;
+k_t4
 if isempty(k_t4) == 1
-    i_t4 = length(SPdata);
-    k_t4 = i_t4-i_PRT;
-    % k_t4 = find(SPdata(i_PRT+1:end) <= SPbar+5, 1, 'first');
-    % k_t4
-    % endtime = i_PRT+k_t4+5/dt;
-    % if endtime > length(SPdata)
-    %     disp('k_t4 too long')
-    %     endtime = length(SPdata);
-    % end
-    % [~,ind] = min(SPdata(i_PRT+k_t4:endtime));
-    % k_t4 = k_t4 + ind;
-    % if k_t4 > length(SPdata)
-    %     k_t4 = length(SPdata);
-    % end
-    % if isempty(k_t4) == 1
-    %     i_t4 = min(N,i_t3+MaxP4);
-    % else
-    %     i_t4 = i_PRT + k_t4;
-    % end
+    k_t4 = find(SPdata(i_PRT+1:end) <= SPbar+5, 1, 'first');
+    k_t4
+    endtime = i_PRT+k_t4+5/dt;
+    if endtime > length(SPdata)
+        disp(k_)
+        endtime = length(SPdata);
+    end
+    [~,ind] = min(SPdata(i_PRT+k_t4:endtime));
+    k_t4 = k_t4 + ind;
+    if k_t4 > length(SPdata)
+        k_t4 = length(SPdata);
+    end
+    if isempty(k_t4) == 1
+        i_t4 = min(N,i_t3+MaxP4);
+    else
+        i_t4 = i_PRT + k_t4;
+    end
 else
     SPdata_i_t4_mean = mean(SPdata(i_t4-1:i_t4)) - mean(SPdata(i_t4:i_t4+1));
     while (SPdata_i_t4_mean > 0 && i_t4 < length(SPdata)-1)

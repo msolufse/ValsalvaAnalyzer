@@ -14,14 +14,14 @@ HR_new = HR;
 
 %% Correcting heart rate 
 while strcmp(answer_HR,'Add change') == 1
+
     f = figure(1); hold on
     subplot(2,1,1); hold on;
     title('scrolling (enter when done)')
     pan on
     xlim([Traw(1), 40])
-    
-    pause
-    
+    pause;
+
     if ismember(findall(0,'type','figure'),f) == 0
         return
     end
